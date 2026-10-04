@@ -23,10 +23,20 @@ export default function Checkout() {
 
   useEffect(() => { track('InitiateCheckout', { value: t.total, currency: 'PKR' }) }, [])
 
+  const PK_PHONE_REGEX = /^(03\d{9}|\+923\d{9})$/
+
   async function place() {
     setBusy(true); setErr('')
+    const normalizedPhone = f.phone.trim().replace(/[-\s]/g, '')
+
+    if (!PK_PHONE_REGEX.test(normalizedPhone)) {
+      setErr('Please enter a valid Pakistani mobile number (e.g. 03001234567 or +923001234567).')
+      setBusy(false)
+      return
+    }
+
     try {
-      await createOrder(lines, f, method, t)
+      await createOrder(lines, { ...f, phone: normalizedPhone }, method, t)
       track('Purchase', { value: t.total, currency: 'PKR' })
       const dueNow = t.dueNow, bal = t.balanceCOD
       completeOrder()
@@ -47,7 +57,8 @@ export default function Checkout() {
     </div>
   )
 
-  const valid = Object.values(f).every(v => v.trim())
+  const isPhoneValid = PK_PHONE_REGEX.test(f.phone.trim().replace(/[-\s]/g, ''))
+  const valid = Object.values(f).every(v => v.trim()) && isPhoneValid
   const opts = [['card', 'Credit / Debit Card'], ['jazzcash', 'JazzCash'], ['cod', 'Cash on Delivery']]
 
   return (

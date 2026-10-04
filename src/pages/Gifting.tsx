@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { pkr } from '../lib/format'
@@ -60,10 +60,23 @@ export default function Gifting() {
   const handleCheckout = (destination: '/checkout' | '/cart' = '/checkout') => {
     if (!selectedProduct) return
 
+    const trimmedRecipient = recipientName.trim()
+    const trimmedMessage = customMessage.trim()
+
+    if (!trimmedRecipient) {
+      alert('Please enter a recipient name for the gift card.')
+      return
+    }
+
+    if (!trimmedMessage) {
+      alert('Please enter a personalized gift message to be handwritten on the card.')
+      return
+    }
+
     const giftDetails: GiftDetails = {
-      recipientName: recipientName.trim(),
+      recipientName: trimmedRecipient,
       senderName: senderName.trim(),
-      message: customMessage.trim(),
+      message: trimmedMessage,
       packaging: 'Signature Gift Packaging, Satin Ribbon & Handwritten Card — PKR 390',
       packagingPrice: 390,
       occasion: occasion.trim(),
@@ -71,14 +84,14 @@ export default function Gifting() {
 
     const packingSummary = [
       'Packaging: Signature Gift Packaging, Satin Ribbon & Handwritten Card — PKR 390',
-      recipientName && `To: ${recipientName.trim()}`,
-      senderName && `From: ${senderName.trim()}`,
+      trimmedRecipient && `To: ${trimmedRecipient}`,
+      senderName.trim() && `From: ${senderName.trim()}`,
       occasion && `Occasion: ${occasion.trim()}`,
     ]
       .filter(Boolean)
       .join(' | ')
 
-    addProduct(selectedProduct, true, customMessage.trim(), packingSummary, giftDetails)
+    addProduct(selectedProduct, true, trimmedMessage, packingSummary, giftDetails)
     navigate(destination)
   }
 
@@ -311,6 +324,7 @@ export default function Gifting() {
                   </label>
                   <input
                     type="text"
+                    maxLength={100}
                     className="field w-full"
                     placeholder="e.g. Ayesha Khan"
                     value={recipientName}
@@ -323,6 +337,7 @@ export default function Gifting() {
                   </label>
                   <input
                     type="text"
+                    maxLength={100}
                     className="field w-full"
                     placeholder="e.g. Farhan Ali"
                     value={senderName}
@@ -360,11 +375,12 @@ export default function Gifting() {
                   <label className="block text-xs uppercase tracking-wider text-ink/70">
                     Custom Gift Message *
                   </label>
-                  <span className="text-[11px] text-ink/40">{customMessage.length} characters</span>
+                  <span className="text-[11px] text-ink/40">{customMessage.length}/500 characters</span>
                 </div>
                 <textarea
                   className="field w-full"
                   rows={4}
+                  maxLength={500}
                   placeholder="Write your personal message here. It will be handwritten on the card exactly as entered..."
                   value={customMessage}
                   onChange={e => setCustomMessage(e.target.value)}

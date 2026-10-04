@@ -153,9 +153,24 @@ export default function Customize() {
   }
 
   // Handle optional image upload
+  const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload a valid image file (e.g. JPG, PNG, WEBP).')
+      e.target.value = ''
+      return
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      alert('The selected reference image exceeds the 5MB file size limit. Please choose a smaller image.')
+      e.target.value = ''
+      return
+    }
+
     const preview = URL.createObjectURL(file)
     setRefFile({ name: file.name, size: file.size, preview })
   }
