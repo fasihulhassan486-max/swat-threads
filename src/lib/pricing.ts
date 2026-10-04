@@ -11,7 +11,7 @@ export function totals(lines: Line[]) {
   const std = lines.filter(l => !l.custom)
   const discount = bundleDiscount(std.filter(l => l.category === 'men').map(l => l.unit), std.filter(l => l.category === 'women').map(l => l.unit))
   const subtotal = lines.reduce((a, l) => a + l.unit, 0)
-  const gift = lines.filter(l => l.gift).length * site.giftBoxPrice
+  const gift = lines.filter(l => l.gift).reduce((sum, l) => sum + (l.giftDetails?.packagingPrice ?? site.giftBoxPrice), 0)
   const total = subtotal - discount + gift
   const customTotal = lines.filter(l => l.custom).reduce((a, l) => a + l.unit, 0)
   const balanceCOD = Math.round(customTotal * (1 - site.advanceRate))

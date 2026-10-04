@@ -22,7 +22,20 @@ export default function Cart() {
               {l.custom && <p className="text-ink/70">{l.custom.color} · {l.custom.size} · {l.custom.pattern}{l.custom.notes && ` · “${l.custom.notes}”`}</p>}
               <p>1 × {pkr(l.unit)}</p>
               {l.colorNote && <p className="text-ink/70">{l.colorNote}</p>}
-              <div className="mt-2"><GiftFields gift={l.gift} note={l.note} packing={l.packing ?? ''} onChange={(g, n, pk) => setGift(l.id, g, n, pk)} /></div>
+              {l.giftDetails ? (
+                <div className="mt-2 bg-beige/60 border border-brass/30 p-2.5 text-xs space-y-1">
+                  <p className="font-serif font-medium text-ink flex items-center justify-between">
+                    <span>🎁 {l.giftDetails.packaging}</span>
+                    <span className="font-sans">+{pkr(l.giftDetails.packagingPrice ?? 500)}</span>
+                  </p>
+                  {l.giftDetails.recipientName && <p className="text-ink/80"><span className="text-ink/60">For:</span> {l.giftDetails.recipientName}</p>}
+                  {l.giftDetails.senderName && <p className="text-ink/80"><span className="text-ink/60">From:</span> {l.giftDetails.senderName}</p>}
+                  {l.giftDetails.occasion && <p className="text-ink/80"><span className="text-ink/60">Occasion:</span> {l.giftDetails.occasion}</p>}
+                  {l.giftDetails.message && <p className="italic text-ink/90 border-l-2 border-brass pl-2 py-0.5 mt-1 bg-white/40">“{l.giftDetails.message}”</p>}
+                </div>
+              ) : (
+                <div className="mt-2"><GiftFields gift={l.gift} note={l.note} packing={l.packing ?? ''} onChange={(g, n, pk) => setGift(l.id, g, n, pk)} /></div>
+              )}
               <button onClick={() => remove(l.id)} className="text-ink/70 underline mt-2">Remove</button></div></div>) })}</div>
         <div><Summary /><Link to="/checkout" className="btn-primary w-full mt-4">Proceed to Checkout</Link></div></div>}</div>)
 }

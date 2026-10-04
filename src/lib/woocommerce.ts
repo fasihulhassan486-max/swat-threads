@@ -28,13 +28,26 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
   const fee = (name: string, total: number, m: Record<string, string | undefined> = {}) => ({ name, total: String(total), tax_status: 'none', meta_data: meta(m) })
   const fees = [
     ...lines.filter(l => l.custom).map(l => fee(l.name, l.unit, { Color: l.custom!.color, Size: l.custom!.size, Pattern: l.custom!.pattern, 'Artisan instructions': l.custom!.notes })),
-    ...lines.filter(l => l.gift).map(l => fee('Heirloom gift box', site.giftBoxPrice, { 'Gift message': l.note, 'Packing preferences': l.packing, For: l.name })),
+    ...lines.filter(l => l.gift).map(l => fee(l.giftDetails?.packaging || 'Heirloom gift box', l.giftDetails?.packagingPrice ?? site.giftBoxPrice, { 'Recipient': l.giftDetails?.recipientName, 'Sender': l.giftDetails?.senderName, 'Gift message': l.giftDetails?.message || l.note, 'Packaging': l.giftDetails?.packaging || l.packing, 'Occasion': l.giftDetails?.occasion, For: l.name })),
     ...(t.discount > 0 ? [fee('Couple bundle discount (10%)', -t.discount)] : []),
   ]
   const body = {
     payment_method: site.wc.paymentIds[method] ?? method, payment_method_title: method.toUpperCase(), set_paid: false,
     billing: addr, shipping: addr,
-    line_items: lines.filter(l => l.productId).map(l => ({ product_id: Number(l.productId), quantity: 1, meta_data: meta({ 'Color suggestion': l.colorNote }) })),
+    line_items: lines.filter(l => l.productId).map(l => ({
+      product_id: Number(l.productId),
+      quantity: 1,
+      meta_data: meta({
+        'Color suggestion': l.colorNote,
+        ...(l.giftDetails ? {
+          'Gift Recipient': l.giftDetails.recipientName,
+          'Gift Sender': l.giftDetails.senderName,
+          'Gift Message': l.giftDetails.message,
+          'Gift Packaging': l.giftDetails.packaging,
+          'Gift Occasion': l.giftDetails.occasion,
+        } : {}),
+      }),
+    })),
     fee_lines: fees,
     customer_note: t.hasCustom ? `Custom order. Advance due now: PKR ${t.dueNow}. Balance on delivery: PKR ${t.balanceCOD}.` : '',
     meta_data: meta({ advance_due_now: String(t.dueNow), cod_balance: String(t.balanceCOD) }),
