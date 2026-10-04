@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+﻿import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { pkr } from '../lib/format'
@@ -435,7 +435,7 @@ export default function Gifting() {
                 <p className="text-xs text-ink/80 font-light leading-relaxed min-h-[48px] italic whitespace-pre-line">
                   {customMessage.trim()
                     ? `“${customMessage.trim()}”`
-                    : '“Your personal message will be inscribed here on our archival cotton cardstock...”'}
+                    : '“Your personal message will be handwritten on your gift card...”'}
                 </p>
                 <div className="pt-2 border-t border-beige/60 flex justify-between items-end">
                   <span className="text-[10px] sm:text-[11px] text-ink/50 font-sans tracking-wide">
