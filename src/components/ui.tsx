@@ -32,13 +32,15 @@ export function ProductCard({ p }: { p: Product }) {
       <Link to={`/product/${p.id}`} className="block relative aspect-[4/5] bg-beige overflow-hidden">
         <Media p={p} />
         {p.badge && <span className="absolute top-3 left-3 bg-brass text-coal text-[10px] uppercase tracking-widest px-2 py-1">{p.badge}</span>}
-        {sold && <div className="absolute inset-0 bg-coal/60 flex items-center justify-center text-white font-serif tracking-widest text-sm text-center px-4">SOLD — ONE OF ONE</div>}
+        {sold && <div className="absolute inset-0 bg-coal/60 flex items-center justify-center text-white font-serif tracking-widest text-sm text-center px-4">SOLD OUT</div>}
       </Link>
       <div className="mt-3 flex justify-between items-start gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] uppercase tracking-widest text-ink/70">1 of 1 · {p.sku}</p>
+          <p className="text-[11px] uppercase tracking-widest text-ink/70">Artisan Piece · {p.sku}</p>
           <Link to={`/product/${p.id}`} className="font-serif text-lg text-ink block truncate">{p.name}</Link>
-          <p className="text-sm text-ink">{pkr(p.price)}</p>
+          <p className="text-sm text-ink font-medium">
+            {p.price > 0 ? pkr(p.price) : <span className="text-ink/60 font-normal">Coming Soon</span>}
+          </p>
         </div>
         <button aria-label="Wishlist" onClick={() => toggleWish(p.id)} className={`p-2 -mr-1.5 transition-colors ${liked ? 'text-brass' : 'text-ink/70 hover:text-ink'}`}>
           <Icon n="heart" fill={liked} />

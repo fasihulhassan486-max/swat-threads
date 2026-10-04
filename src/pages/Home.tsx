@@ -78,16 +78,16 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-coal/95 via-coal/70 to-coal/40 md:to-transparent" />
         <div className="relative container-x w-full py-16 sm:py-24">
           <div className="max-w-xl">
-            <p className="eyebrow !text-brass">Swat Shawls · Pakistan</p>
+            <p className="eyebrow !text-brass">VIRAS · Swat Valley, Pakistan</p>
             <h1 className="text-3xl sm:text-5xl md:text-7xl font-light leading-[1.1] my-4 sm:my-6">
-              Woven in Swat.<br />Made for Today.
+              Heritage,<br />Woven for Today.
             </h1>
             <p className="text-white/85 mb-6 sm:mb-9 text-base sm:text-lg leading-relaxed">
-              Authentic handwoven shawls from the misty Himalayan &amp; Hindu Kush mountains of Swat Valley.
+              Handcrafted shawls from Swat Valley, made for modern wardrobes, meaningful gifting, and moments worth keeping.
             </p>
             <div className="flex gap-3 flex-wrap">
-              <Link to="/shop" className="btn-dark-fill">Shop Collection</Link>
-              <Link to="/our-story" className="btn-dark-outline">Our Story</Link>
+              <Link to="/shop?category=men" className="btn-dark-fill">Men's Collection</Link>
+              <Link to="/shop?category=women" className="btn-dark-outline">Women's Collection</Link>
             </div>
           </div>
         </div>
@@ -122,20 +122,20 @@ export default function Home() {
       <section className="container-x grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 py-8 sm:py-16">
         <Link to="/shop?category=men" className="bg-coal text-white p-6 sm:p-8 md:p-12 min-h-[180px] sm:min-h-[240px] flex flex-col justify-end group hover:bg-[#232724] transition-colors relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-2xl sm:text-3xl font-serif">Shop Men</h3>
-            <p className="text-white/80 mt-1 text-sm">Earthy, substantial wraps.</p>
+            <h3 className="text-2xl sm:text-3xl font-serif">Men's Shawls</h3>
+            <p className="text-white/80 mt-1 text-sm">Handwoven wool shawls for warmth and understated elegance.</p>
           </div>
         </Link>
         <Link to="/shop?category=women" className="bg-brass text-coal p-6 sm:p-8 md:p-12 min-h-[180px] sm:min-h-[240px] flex flex-col justify-end group hover:bg-[#c19d65] transition-colors relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-2xl sm:text-3xl font-serif">Shop Women</h3>
-            <p className="text-coal/80 mt-1 text-sm">Soft, refined heirlooms.</p>
+            <h3 className="text-2xl sm:text-3xl font-serif">Women's Shawls</h3>
+            <p className="text-coal/80 mt-1 text-sm">Soft wool &amp; Swiss Lawn shawls for modern wardrobes.</p>
           </div>
         </Link>
         <Link to="/couple-bundle" className="bg-beige text-ink p-6 sm:p-8 md:p-12 min-h-[180px] sm:min-h-[240px] flex flex-col justify-end border border-brass group hover:bg-[#f3ede3] transition-colors relative overflow-hidden">
           <div className="relative z-10">
             <h3 className="text-2xl sm:text-3xl font-serif">Couple Bundle</h3>
-            <p className="text-ink/70 mt-1 text-sm">His &amp; hers — save 10%.</p>
+            <p className="text-ink/70 mt-1 text-sm">His &amp; hers heirloom set — 10% savings &amp; complimentary Swati gifts.</p>
           </div>
         </Link>
       </section>
@@ -145,7 +145,7 @@ export default function Home() {
         <div className="container-x py-10 sm:py-16 text-center max-w-2xl">
           <h2 className="text-2xl sm:text-3xl text-ink mb-3 sm:mb-4">Customize Your Own Shawl</h2>
           <p className="text-ink/70 mb-6 text-sm sm:text-base leading-relaxed">
-            Choose your color, size and border. Pay 50% advance online and the balance on delivery. Made and delivered in 8–10 days.
+            Choose a shawl from our artisan collection and make it your own. Select your preferred color, finish, fabric, or dimensions. Custom orders are prepared within 8–10 days before dispatch.
           </p>
           <Link to="/customize" className="btn-primary">Start a custom order</Link>
         </div>
@@ -172,7 +172,7 @@ export default function Home() {
       {/* FOOTER CTA */}
       <section className="container-x py-12 sm:py-20 text-center max-w-xl">
         <h2 className="text-3xl sm:text-4xl text-ink mb-3 font-serif">Find Your Shawl</h2>
-        <p className="text-ink/70 mb-6 text-sm sm:text-base">A small, considered collection — every piece is one of one.</p>
+        <p className="text-ink/70 mb-6 text-sm sm:text-base">A small, considered collection — handcrafted in Swat Valley and made to be kept.</p>
         <div className="flex gap-3 justify-center flex-wrap">
           <Link to="/shop" className="btn-primary">Explore Collection</Link>
           <Link to="/contact" className="btn-outline">Talk to us</Link>

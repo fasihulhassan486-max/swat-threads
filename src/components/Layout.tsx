@@ -66,8 +66,8 @@ export default function Layout() {
               <path d="M2 22 14 6l8 10 5-6 11 12" />
             </svg>
             <span className="leading-none">
-              <span className="block font-serif text-xl sm:text-2xl tracking-[0.25em] sm:tracking-[0.3em]">SWAT THREADS</span>
-              <span className="block text-[8px] sm:text-[9px] tracking-[0.35em] text-ink/70 mt-1">HANDWOVEN SHAWLS</span>
+              <span className="block font-serif text-xl sm:text-2xl tracking-[0.25em] sm:tracking-[0.3em]">VIRAS</span>
+              <span className="block text-[8px] sm:text-[9px] tracking-[0.35em] text-ink/70 mt-1">SWAT VALLEY · HERITAGE SHAWLS</span>
             </span>
           </Link>
 
@@ -165,9 +165,9 @@ export default function Layout() {
       <footer className="bg-coal text-white/70 text-sm">
         <div className="container-x py-12 sm:py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10">
           <div className="sm:col-span-2 md:col-span-1">
-            <h4 className="text-white text-xl tracking-[0.25em] mb-3">Swat Threads</h4>
+            <h4 className="text-white text-xl tracking-[0.25em] mb-3">VIRAS</h4>
             <p className="max-w-sm text-sm leading-relaxed">
-              Handwoven wool shawls from Swat Valley, Pakistan — one of one, made to be kept.
+              Handcrafted shawls rooted in the heritage of Swat Valley, Pakistan, made for modern wardrobes and meant to be kept.
             </p>
           </div>
           <div>
@@ -208,7 +208,7 @@ export default function Layout() {
         </div>
 
         <div className="border-t border-white/10 py-4 container-x flex flex-col sm:flex-row justify-between gap-2 text-xs text-white/50">
-          <span>© {new Date().getFullYear()} Swat Threads</span>
+          <span>© {new Date().getFullYear()} VIRAS</span>
           <span>Cash on Delivery &amp; Online Payment</span>
         </div>
       </footer>
