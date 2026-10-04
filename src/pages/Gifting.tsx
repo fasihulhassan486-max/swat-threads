@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { pkr } from '../lib/format'
-import { site } from '../config/site'
 import { Icon, Media } from '../components/ui'
 import type { GiftDetails } from '../types'
 
@@ -13,59 +12,32 @@ const OCCASIONS = [
   'Anniversary',
   'Thank You',
   'Thinking of You',
-  'Corporate Gift',
   'Other',
-]
-
-const PACKAGING_OPTIONS = [
-  {
-    id: 'wooden-box',
-    name: 'Heirloom Pine Wooden Box',
-    badge: 'Artisan Favorite',
-    price: site.giftBoxPrice || 500,
-    desc: 'Handcrafted Swat cedar/pine keepsake box with a brass latch, unbleached muslin cloth lining & artisan wax seal.',
-  },
-  {
-    id: 'velvet-wrap',
-    name: 'Royal Heritage Velvet Wrap',
-    badge: 'Luxury Edition',
-    price: 850,
-    desc: 'Rich forest-emerald velvet wrap adorned with golden foil debossing and tied with raw mulberry silk ribbon.',
-  },
-  {
-    id: 'botanical-wrap',
-    name: 'Minimalist Botanical Wrap',
-    badge: 'Organic & Pure',
-    price: 350,
-    desc: 'Textured handmade mountain paper wrapped with a dried Swat alpine wildflower sprig and natural jute cord.',
-  },
 ]
 
 export default function Gifting() {
   const { products, inStock, addProduct, loading } = useStore()
   const navigate = useNavigate()
 
-  // State
+  // Form State
   const [selectedId, setSelectedId] = useState<string>('')
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'gifting' | 'men' | 'women'>('all')
-  const [packagingId, setPackagingId] = useState<string>('wooden-box')
   const [recipientName, setRecipientName] = useState('')
   const [senderName, setSenderName] = useState('')
   const [occasion, setOccasion] = useState('')
   const [customMessage, setCustomMessage] = useState('')
-  const [packingNotes, setPackingNotes] = useState('')
 
-  // Filter in-stock shawls
+  // In-stock products
   const availableShawls = useMemo(() => {
     return products.filter(p => inStock(p))
   }, [products, inStock])
 
-  // Check if there are any products tagged with 'gifting'
+  // Check if any product has the 'gifting' category
   const hasGiftingCategory = useMemo(() => {
     return availableShawls.some(p => p.category === 'gifting')
   }, [availableShawls])
 
-  // Filtered by selected tab
+  // Filtered list
   const displayedShawls = useMemo(() => {
     if (categoryFilter === 'all') return availableShawls
     if (categoryFilter === 'gifting') return availableShawls.filter(p => p.category === 'gifting')
@@ -74,39 +46,32 @@ export default function Gifting() {
     return availableShawls
   }, [availableShawls, categoryFilter])
 
-  // Active selections
+  // Currently selected product
   const selectedProduct = useMemo(() => {
     return products.find(p => p.id === selectedId) || null
   }, [products, selectedId])
 
-  const selectedPackaging = useMemo(() => {
-    return PACKAGING_OPTIONS.find(pkg => pkg.id === packagingId) || PACKAGING_OPTIONS[0]
-  }, [packagingId])
+  // Total price (Signature packaging is complimentary / included)
+  const totalPrice = selectedProduct ? selectedProduct.price : 0
 
-  // Price calculations
-  const productPrice = selectedProduct?.price ?? 0
-  const packagingPrice = selectedPackaging.price
-  const totalPrice = productPrice + packagingPrice
-
-  // Handle Cart & Checkout
-  const handleProceed = (destination: '/checkout' | '/cart') => {
+  // Handle Checkout & Cart
+  const handleCheckout = (destination: '/checkout' | '/cart' = '/checkout') => {
     if (!selectedProduct) return
 
     const giftDetails: GiftDetails = {
       recipientName: recipientName.trim(),
       senderName: senderName.trim(),
       message: customMessage.trim(),
-      packaging: selectedPackaging.name,
-      packagingPrice: selectedPackaging.price,
+      packaging: 'Signature Heirloom Box with Satin Ribbon & Handwritten Card',
+      packagingPrice: 0,
       occasion: occasion.trim(),
     }
 
     const packingSummary = [
-      `Packaging: ${selectedPackaging.name}`,
+      'Packaging: Signature Heirloom Box (Complimentary)',
       recipientName && `To: ${recipientName.trim()}`,
       senderName && `From: ${senderName.trim()}`,
       occasion && `Occasion: ${occasion.trim()}`,
-      packingNotes && `Note: ${packingNotes.trim()}`,
     ]
       .filter(Boolean)
       .join(' | ')
@@ -116,53 +81,42 @@ export default function Gifting() {
   }
 
   return (
-    <div className="container-x py-12 max-w-6xl">
-      {/* HEADER HERO */}
-      <div className="text-center max-w-2xl mx-auto mb-12">
-        <p className="eyebrow !text-brass">Heirloom Gifting · Swat Valley</p>
-        <h1 className="text-4xl md:text-5xl font-light text-ink my-3">Curate an Heirloom Gift</h1>
-        <p className="text-ink/75 text-base leading-relaxed">
-          Select an authentic handwoven shawl, choose bespoke artisan packaging, and compose a personalized handwritten card to be delivered anywhere in Pakistan.
+    <div className="max-w-6xl mx-auto px-6 py-12">
+      {/* PAGE HEADER */}
+      <div className="max-w-2xl mb-12">
+        <p className="eyebrow mb-2">Bespoke Gifting · Swat Valley</p>
+        <h1 className="text-4xl md:text-5xl font-light text-ink tracking-tight mb-3">
+          Gift a Handwoven Shawl
+        </h1>
+        <p className="text-ink/70 text-base leading-relaxed">
+          Choose an authentic piece of Swat heritage. Each gift is presented in our signature heirloom wooden box with your personalized handwritten card.
         </p>
-
-        {/* STEP PROGRESS PILLS */}
-        <div className="flex items-center justify-center gap-2 mt-8 text-xs uppercase tracking-wider text-ink/60 overflow-x-auto pb-2">
-          <span className={`px-3 py-1.5 border ${selectedProduct ? 'bg-brass text-coal border-brass font-medium' : 'border-ink/20 text-ink'}`}>
-            1. Select Shawl {selectedProduct ? '✓' : ''}
-          </span>
-          <span className="text-ink/30">→</span>
-          <span className="px-3 py-1.5 border border-ink/20 text-ink bg-beige/60">
-            2. Choose Packaging
-          </span>
-          <span className="text-ink/30">→</span>
-          <span className="px-3 py-1.5 border border-ink/20 text-ink bg-beige/60">
-            3. Card &amp; Message
-          </span>
-          <span className="text-ink/30">→</span>
-          <span className="px-3 py-1.5 border border-ink/20 text-ink bg-beige/60">
-            4. Checkout
-          </span>
-        </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-10">
-        {/* MAIN CONFIGURATION COLUMN (2 COLUMNS ON LARGE) */}
-        <div className="lg:col-span-2 space-y-12">
+      {/* 2-COLUMN MAIN LAYOUT */}
+      <div className="grid lg:grid-cols-12 gap-12 items-start">
+        
+        {/* LEFT COLUMN: STEP-BY-STEP GIFT CREATION FORM */}
+        <div className="lg:col-span-7 space-y-12">
 
-          {/* STEP 1: SELECT A SHAWL */}
-          <section className="bg-white border border-beige p-6 md:p-8 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-beige">
+          {/* STEP 1: CHOOSE A HANDWOVEN SHAWL */}
+          <section className="bg-white border border-beige/70 p-6 md:p-8 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 mb-6 pb-4 border-b border-beige/60">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-widest text-brass block">Step 01</span>
+                <span className="text-[11px] font-mono tracking-widest text-walnut uppercase block">Step 01</span>
                 <h2 className="text-2xl font-serif text-ink">Choose a Handwoven Shawl</h2>
               </div>
 
-              {/* CATEGORY TABS */}
+              {/* CATEGORY FILTER TABS */}
               <div className="flex flex-wrap gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => setCategoryFilter('all')}
-                  className={`px-3 py-1.5 transition-colors border ${categoryFilter === 'all' ? 'bg-coal text-white border-coal' : 'bg-beige/50 text-ink border-beige hover:border-ink/30'}`}
+                  className={`px-3 py-1.5 transition-colors border ${
+                    categoryFilter === 'all'
+                      ? 'bg-walnut text-white border-walnut'
+                      : 'bg-ivory text-ink/80 border-beige hover:border-walnut/40'
+                  }`}
                 >
                   All ({availableShawls.length})
                 </button>
@@ -170,7 +124,11 @@ export default function Gifting() {
                   <button
                     type="button"
                     onClick={() => setCategoryFilter('gifting')}
-                    className={`px-3 py-1.5 transition-colors border ${categoryFilter === 'gifting' ? 'bg-coal text-white border-coal' : 'bg-beige/50 text-ink border-beige hover:border-ink/30'}`}
+                    className={`px-3 py-1.5 transition-colors border ${
+                      categoryFilter === 'gifting'
+                        ? 'bg-walnut text-white border-walnut'
+                        : 'bg-ivory text-ink/80 border-beige hover:border-walnut/40'
+                    }`}
                   >
                     Gifting Special
                   </button>
@@ -178,14 +136,22 @@ export default function Gifting() {
                 <button
                   type="button"
                   onClick={() => setCategoryFilter('men')}
-                  className={`px-3 py-1.5 transition-colors border ${categoryFilter === 'men' ? 'bg-coal text-white border-coal' : 'bg-beige/50 text-ink border-beige hover:border-ink/30'}`}
+                  className={`px-3 py-1.5 transition-colors border ${
+                    categoryFilter === 'men'
+                      ? 'bg-walnut text-white border-walnut'
+                      : 'bg-ivory text-ink/80 border-beige hover:border-walnut/40'
+                  }`}
                 >
                   Men’s
                 </button>
                 <button
                   type="button"
                   onClick={() => setCategoryFilter('women')}
-                  className={`px-3 py-1.5 transition-colors border ${categoryFilter === 'women' ? 'bg-coal text-white border-coal' : 'bg-beige/50 text-ink border-beige hover:border-ink/30'}`}
+                  className={`px-3 py-1.5 transition-colors border ${
+                    categoryFilter === 'women'
+                      ? 'bg-walnut text-white border-walnut'
+                      : 'bg-ivory text-ink/80 border-beige hover:border-walnut/40'
+                  }`}
                 >
                   Women’s
                 </button>
@@ -193,21 +159,21 @@ export default function Gifting() {
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-ink/60 font-serif">
+              <div className="py-16 text-center text-ink/60 font-serif">
                 <p>Loading available Swat shawls…</p>
               </div>
             ) : displayedShawls.length === 0 ? (
               <div className="py-12 text-center text-ink/60 font-serif">
-                <p>No shawls available in this category currently.</p>
+                <p>No shawls available in this category right now.</p>
                 <button
                   onClick={() => setCategoryFilter('all')}
-                  className="mt-3 text-xs underline text-brass"
+                  className="mt-2 text-xs underline text-walnut"
                 >
-                  View all available pieces
+                  Show all available shawls
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto p-1 pr-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[480px] overflow-y-auto p-1 pr-2">
                 {displayedShawls.map((shawl) => {
                   const isSelected = selectedId === shawl.id
                   return (
@@ -216,18 +182,18 @@ export default function Gifting() {
                       onClick={() => setSelectedId(shawl.id)}
                       className={`group cursor-pointer border p-3 flex flex-col justify-between transition-all duration-200 relative ${
                         isSelected
-                          ? 'border-brass ring-2 ring-brass/60 bg-brass/5 shadow-md'
-                          : 'border-beige hover:border-brass/40 bg-white hover:bg-beige/20'
+                          ? 'border-walnut ring-1 ring-walnut bg-beige/10 shadow-sm'
+                          : 'border-beige hover:border-walnut/50 bg-white hover:bg-ivory/50'
                       }`}
                     >
                       {/* SELECTED BADGE */}
                       {isSelected && (
-                        <div className="absolute top-2 right-2 z-10 bg-brass text-coal text-[10px] font-bold px-2 py-0.5 rounded-sm flex items-center gap-1 shadow-sm">
+                        <div className="absolute top-2 right-2 z-10 bg-walnut text-white text-[10px] font-sans uppercase tracking-wider px-2 py-0.5 rounded-sm flex items-center gap-1 shadow-sm">
                           <span>✓</span> Selected
                         </div>
                       )}
 
-                      <div className="aspect-[4/5] bg-beige relative overflow-hidden mb-3">
+                      <div className="aspect-[4/5] bg-beige/40 relative overflow-hidden mb-3">
                         <Media p={shawl} />
                         {shawl.badge && !isSelected && (
                           <span className="absolute top-2 left-2 bg-coal/80 text-white text-[9px] uppercase tracking-widest px-1.5 py-0.5">
@@ -237,12 +203,12 @@ export default function Gifting() {
                       </div>
 
                       <div>
-                        <p className="text-[10px] uppercase tracking-widest text-ink/60">
+                        <p className="text-[10px] uppercase tracking-widest text-ink/50">
                           {shawl.category} · {shawl.sku}
                         </p>
-                        <h4 className="font-serif text-sm text-ink group-hover:text-brass transition-colors line-clamp-1">
+                        <h3 className="font-serif text-sm text-ink group-hover:text-walnut transition-colors line-clamp-1 mt-0.5">
                           {shawl.name}
-                        </h4>
+                        </h3>
                         <p className="text-xs font-semibold text-ink mt-1">
                           {pkr(shawl.price)}
                         </p>
@@ -250,13 +216,13 @@ export default function Gifting() {
 
                       <button
                         type="button"
-                        className={`w-full text-xs py-1.5 mt-3 transition-colors uppercase tracking-wider font-sans ${
+                        className={`w-full text-[11px] py-1.5 mt-3 transition-colors uppercase tracking-wider font-sans ${
                           isSelected
-                            ? 'bg-brass text-coal font-medium'
-                            : 'border border-ink/20 text-ink hover:border-brass hover:text-brass'
+                            ? 'bg-walnut text-white font-medium'
+                            : 'border border-beige text-ink/80 hover:border-walnut hover:text-walnut'
                         }`}
                       >
-                        {isSelected ? 'Selected Piece' : 'Select'}
+                        {isSelected ? 'Selected' : 'Select'}
                       </button>
                     </div>
                   )
@@ -265,109 +231,119 @@ export default function Gifting() {
             )}
 
             {!selectedProduct && (
-              <p className="text-xs text-brass mt-4 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-brass animate-ping"></span>
-                Please click on a shawl above to personalize your gift.
+              <p className="text-xs text-walnut mt-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-walnut animate-pulse"></span>
+                Please choose a shawl above to complete your gift box.
               </p>
             )}
           </section>
 
-          {/* STEP 2: GIFT PACKAGING OPTIONS */}
-          <section className="bg-white border border-beige p-6 md:p-8 shadow-sm">
-            <div className="mb-6 pb-4 border-b border-beige">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-brass block">Step 02</span>
-              <h2 className="text-2xl font-serif text-ink">Select Gift Packaging</h2>
-              <p className="text-xs text-ink/70 mt-1">Every box or wrap is carefully prepared by hand before dispatch.</p>
+          {/* STEP 2: SIGNATURE GIFT PACKAGING (DEFAULT INCLUDED) */}
+          <section className="bg-white border border-beige/70 p-6 md:p-8 shadow-sm">
+            <div className="mb-6 pb-4 border-b border-beige/60">
+              <span className="text-[11px] font-mono tracking-widest text-walnut uppercase block">Step 02</span>
+              <h2 className="text-2xl font-serif text-ink">Signature Gift Packaging</h2>
+              <p className="text-xs text-ink/70 mt-1">Included with every bespoke gift order.</p>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-4">
-              {PACKAGING_OPTIONS.map((pkg) => {
-                const isSelected = packagingId === pkg.id
-                return (
-                  <div
-                    key={pkg.id}
-                    onClick={() => setPackagingId(pkg.id)}
-                    className={`cursor-pointer p-4 border flex flex-col justify-between transition-all duration-200 relative ${
-                      isSelected
-                        ? 'border-brass ring-2 ring-brass/60 bg-brass/5 shadow-sm'
-                        : 'border-beige hover:border-brass/30 bg-white hover:bg-beige/10'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="text-[10px] uppercase tracking-widest bg-beige px-2 py-0.5 text-ink/70">
-                          {pkg.badge}
-                        </span>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'border-brass bg-brass text-coal text-[10px]' : 'border-ink/30'}`}>
-                          {isSelected && '✓'}
-                        </div>
-                      </div>
-                      <h3 className="font-serif text-base text-ink mb-1">{pkg.name}</h3>
-                      <p className="text-xs text-ink/70 leading-relaxed mb-3">{pkg.desc}</p>
+            {/* SINGLE ELEGANT PACKAGING CARD */}
+            <div className="border border-walnut/30 bg-[#FAF7F2] p-6 relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div className="space-y-2 max-w-lg">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="bg-walnut/10 text-walnut text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 border border-walnut/20">
+                      Complimentary Included
+                    </span>
+                    <span className="text-[10px] text-ink/50 uppercase tracking-wider font-sans">
+                      Standard on all gifts
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-xl text-ink">
+                    Signature Heirloom Box with Satin Ribbon &amp; Handwritten Card
+                  </h3>
+                  
+                  <p className="text-sm text-ink/75 leading-relaxed pt-1">
+                    Every piece is placed inside our handcrafted solid pine wooden box from Swat Valley, nestled in soft unbleached muslin cloth, finished with an artisan brass latch, and tied with our signature forest-green ribbon.
+                  </p>
+
+                  <div className="pt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-ink/70">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-walnut">✓</span>
+                      <span>Handmade Pine Box</span>
                     </div>
-                    <div className="pt-2 border-t border-beige/60 flex items-center justify-between">
-                      <span className="text-xs text-ink/60">Packaging add-on:</span>
-                      <span className="text-sm font-semibold text-ink">+{pkr(pkg.price)}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-walnut">✓</span>
+                      <span>Archival Cotton Card</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-walnut">✓</span>
+                      <span>Muslin Fabric Lining</span>
                     </div>
                   </div>
-                )
-              })}
+                </div>
+
+                <div className="sm:text-right shrink-0">
+                  <span className="font-serif text-lg text-walnut font-medium">Free</span>
+                  <span className="block text-[11px] text-ink/50 line-through">PKR 500</span>
+                </div>
+              </div>
             </div>
           </section>
 
-          {/* STEP 3: RECIPIENT, SENDER & CARD MESSAGE */}
-          <section className="bg-white border border-beige p-6 md:p-8 shadow-sm">
-            <div className="mb-6 pb-4 border-b border-beige">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-brass block">Step 03</span>
+          {/* STEP 3: PERSONALIZE YOUR GIFT CARD */}
+          <section className="bg-white border border-beige/70 p-6 md:p-8 shadow-sm">
+            <div className="mb-6 pb-4 border-b border-beige/60">
+              <span className="text-[11px] font-mono tracking-widest text-walnut uppercase block">Step 03</span>
               <h2 className="text-2xl font-serif text-ink">Personalize Your Gift Card</h2>
               <p className="text-xs text-ink/70 mt-1">
-                Your message is calligraphed or hand-printed on heavy textured cotton cardstock and enclosed in an artisan wax-sealed envelope.
+                Your message is penned on heavy textured archival cardstock and sealed inside the box.
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-ink/70 mb-1.5">
-                    Recipient Name (Who is this for?) *
+                    Recipient Name (“To”) *
                   </label>
                   <input
                     type="text"
                     className="field w-full"
-                    placeholder="e.g. Ayesha Khan / Uncle Jamil"
+                    placeholder="e.g. Ayesha Khan"
                     value={recipientName}
                     onChange={e => setRecipientName(e.target.value)}
                   />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-ink/70 mb-1.5">
-                    Sender Name (From whom?)
+                    Sender Name (“From”)
                   </label>
                   <input
                     type="text"
                     className="field w-full"
-                    placeholder="e.g. Farhan / With love, The Alis"
+                    placeholder="e.g. Farhan Ali"
                     value={senderName}
                     onChange={e => setSenderName(e.target.value)}
                   />
                 </div>
               </div>
 
-              {/* OCCASION SELECTION */}
+              {/* OCCASION SELECTION CHIPS */}
               <div>
                 <label className="block text-xs uppercase tracking-wider text-ink/70 mb-1.5">
                   Select Occasion (Optional)
                 </label>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex flex-wrap gap-2">
                   {OCCASIONS.map(occ => (
                     <button
                       key={occ}
                       type="button"
                       onClick={() => setOccasion(occasion === occ ? '' : occ)}
-                      className={`text-xs px-2.5 py-1 border transition-colors ${
+                      className={`text-xs px-3 py-1.5 border transition-colors ${
                         occasion === occ
-                          ? 'bg-brass text-coal border-brass font-medium'
-                          : 'bg-beige/40 text-ink/80 border-beige hover:border-ink/30'
+                          ? 'bg-walnut text-white border-walnut'
+                          : 'bg-ivory text-ink/80 border-beige hover:border-walnut/40'
                       }`}
                     >
                       {occ}
@@ -376,34 +352,20 @@ export default function Gifting() {
                 </div>
               </div>
 
-              {/* MESSAGE TEXTAREA */}
+              {/* GIFT CARD MESSAGE */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-xs uppercase tracking-wider text-ink/70">
-                    Custom Gift Card Message *
+                    Custom Gift Message *
                   </label>
-                  <span className="text-[11px] text-ink/50">{customMessage.length} characters</span>
+                  <span className="text-[11px] text-ink/40">{customMessage.length} characters</span>
                 </div>
                 <textarea
                   className="field w-full"
                   rows={4}
-                  placeholder="Write your heartfelt note here. It will be inscribed inside the gift box exactly as entered..."
+                  placeholder="Write your personal message here. It will be handwritten on the card exactly as entered..."
                   value={customMessage}
                   onChange={e => setCustomMessage(e.target.value)}
-                />
-              </div>
-
-              {/* SPECIAL PACKING INSTRUCTIONS */}
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-ink/70 mb-1.5">
-                  Special Packing or Delivery Notes (Optional)
-                </label>
-                <textarea
-                  className="field w-full"
-                  rows={2}
-                  placeholder="e.g. Please do not include pricing invoice in the box; wrap in double protection for overseas hand-carry..."
-                  value={packingNotes}
-                  onChange={e => setPackingNotes(e.target.value)}
                 />
               </div>
             </div>
@@ -411,122 +373,130 @@ export default function Gifting() {
 
         </div>
 
-        {/* SIDEBAR: LIVE GIFT CARD PREVIEW & ORDER SUMMARY */}
-        <div className="space-y-6">
-          {/* LIVE GIFT CARD PREVIEW */}
-          <div className="bg-[#FAF7F2] border border-brass/40 p-6 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-brass/10 -rotate-45 translate-x-10 -translate-y-10" />
-            <div className="flex items-center justify-between mb-4 border-b border-brass/20 pb-3">
-              <span className="text-[10px] uppercase tracking-widest text-brass font-mono">Live Card Preview</span>
-              <span className="text-[10px] text-ink/50 uppercase tracking-widest font-serif">Swat Threads</span>
+        {/* RIGHT COLUMN: STICKY GIFT SUMMARY CARD */}
+        <div className="lg:col-span-5 sticky top-8">
+          <div className="bg-white border border-beige/80 p-6 md:p-8 shadow-sm space-y-6">
+            
+            <div className="pb-4 border-b border-beige/60">
+              <span className="eyebrow block mb-1">Heirloom Edition</span>
+              <h2 className="text-2xl font-serif text-ink">Gift Summary</h2>
             </div>
 
-            <div className="space-y-4 font-serif text-ink">
-              <p className="text-xs uppercase tracking-widest text-brass font-sans">
-                {occasion ? `• ${occasion} •` : '• With Warmth •'}
-              </p>
-              <p className="text-lg text-ink font-light italic">
-                Dearest {recipientName.trim() || 'Recipient'},
-              </p>
-              <p className="text-sm text-ink/80 font-light leading-relaxed min-h-[70px] italic whitespace-pre-line">
-                {customMessage.trim() ? `“${customMessage.trim()}”` : '“Your custom gift message will appear here, handwritten on our archival cardstock...”'}
-              </p>
-              <div className="pt-3 border-t border-brass/20 flex justify-between items-end">
-                <span className="text-xs text-ink/60 font-sans tracking-wide">
-                  Swat Valley, Pakistan
-                </span>
-                <span className="font-serif italic text-sm text-ink">
-                  — {senderName.trim() || 'Your Name'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* DYNAMIC INVESTMENT SUMMARY */}
-          <div className="bg-beige border border-brass/30 p-6 space-y-4">
-            <h3 className="font-serif text-xl text-ink pb-2 border-b border-brass/20">
-              Gift Summary
-            </h3>
-
-            {/* SELECTED ITEM */}
+            {/* SELECTED ITEM DISPLAY */}
             {selectedProduct ? (
-              <div className="flex gap-3 items-center py-2 border-b border-beige">
-                <div className="w-14 h-16 bg-white shrink-0 overflow-hidden border border-beige">
+              <div className="flex gap-4 items-center p-3 bg-ivory border border-beige/60">
+                <div className="w-16 h-20 bg-white shrink-0 overflow-hidden border border-beige">
                   <Media p={selectedProduct} />
                 </div>
                 <div className="flex-1 min-w-0 text-sm">
-                  <p className="font-serif text-ink truncate">{selectedProduct.name}</p>
-                  <p className="text-xs text-ink/60">1 of 1 · {selectedProduct.sku}</p>
-                  <p className="text-sm font-medium text-ink">{pkr(selectedProduct.price)}</p>
+                  <p className="font-serif text-base text-ink truncate">{selectedProduct.name}</p>
+                  <p className="text-xs text-ink/50 uppercase tracking-widest">{selectedProduct.sku}</p>
+                  <p className="text-sm font-semibold text-walnut mt-1">{pkr(selectedProduct.price)}</p>
                 </div>
               </div>
             ) : (
-              <div className="py-3 text-sm text-ink/60 border-b border-beige italic">
-                No shawl selected yet. Pick one from Step 1.
+              <div className="py-6 px-4 bg-ivory/60 border border-dashed border-beige text-center text-sm text-ink/60 font-serif">
+                Select a shawl from Step 1 to preview your gift box.
               </div>
             )}
 
-            {/* BREAKDOWN */}
-            <div className="space-y-2 text-sm text-ink/80">
-              <div className="flex justify-between">
-                <span>Handwoven Shawl</span>
-                <span>{pkr(productPrice)}</span>
+            {/* PACKAGING INCLUSIONS */}
+            <div className="space-y-2.5 text-xs text-ink/75 pt-2">
+              <div className="flex justify-between items-center">
+                <span>Handwoven Swat Shawl</span>
+                <span className="font-medium text-ink">{pkr(totalPrice)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>{selectedPackaging.name}</span>
-                <span>+{pkr(packagingPrice)}</span>
+              <div className="flex justify-between items-center">
+                <span>Signature Wooden Heirloom Box</span>
+                <span className="text-walnut font-medium">Included (Free)</span>
               </div>
-              <div className="flex justify-between text-xs text-ink/60">
-                <span>Handwritten Card &amp; Seal</span>
-                <span className="text-brass uppercase font-sans font-medium">Included</span>
+              <div className="flex justify-between items-center">
+                <span>Handwritten Archival Card &amp; Seal</span>
+                <span className="text-walnut font-medium">Included (Free)</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Muslin Fabric Wrap &amp; Ribbon</span>
+                <span className="text-walnut font-medium">Included (Free)</span>
               </div>
             </div>
 
-            {/* TOTAL */}
-            <div className="pt-3 border-t border-brass/30 flex justify-between items-baseline">
+            {/* LIVE GIFT CARD PREVIEW */}
+            <div className="bg-[#FAF7F2] border border-beige p-5 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-3 border-b border-beige/60 pb-2">
+                <span className="text-[10px] uppercase tracking-widest text-walnut font-mono">Live Card Preview</span>
+                <span className="text-[10px] text-ink/40 uppercase tracking-widest font-serif">Swat Threads</span>
+              </div>
+
+              <div className="space-y-3 font-serif text-ink">
+                <p className="text-xs uppercase tracking-widest text-walnut font-sans">
+                  {occasion ? `• ${occasion} •` : '• With Warmth •'}
+                </p>
+                <p className="text-base text-ink font-light italic">
+                  Dearest {recipientName.trim() || 'Recipient'},
+                </p>
+                <p className="text-xs text-ink/80 font-light leading-relaxed min-h-[50px] italic whitespace-pre-line">
+                  {customMessage.trim()
+                    ? `“${customMessage.trim()}”`
+                    : '“Your personal message will be inscribed here on our archival cotton cardstock...”'}
+                </p>
+                <div className="pt-2 border-t border-beige/60 flex justify-between items-end">
+                  <span className="text-[11px] text-ink/50 font-sans tracking-wide">
+                    Swat Valley, PK
+                  </span>
+                  <span className="font-serif italic text-xs text-ink">
+                    — {senderName.trim() || 'Your Name'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* TOTAL INVESTMENT */}
+            <div className="pt-4 border-t border-beige/60 flex justify-between items-baseline">
               <span className="font-serif text-lg text-ink">Total Investment</span>
-              <span className="font-serif text-2xl text-ink font-semibold">{pkr(totalPrice)}</span>
+              <span className="font-serif text-3xl text-ink font-semibold">{pkr(totalPrice)}</span>
             </div>
 
-            {/* CTA BUTTONS */}
-            <div className="space-y-2 pt-2">
+            {/* CALL TO ACTION BUTTON */}
+            <div className="space-y-3 pt-2">
               <button
                 type="button"
                 disabled={!selectedProduct}
-                onClick={() => handleProceed('/checkout')}
-                className="btn-primary w-full py-3.5 text-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={() => handleCheckout('/checkout')}
+                className="btn-primary w-full py-4 text-center text-xs tracking-[0.2em] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <span>Proceed to Checkout</span>
+                <span>Add Gift Box to Cart &amp; Checkout</span>
                 <span>→</span>
               </button>
 
               <button
                 type="button"
                 disabled={!selectedProduct}
-                onClick={() => handleProceed('/cart')}
-                className="btn-outline w-full py-2.5 text-center text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => handleCheckout('/cart')}
+                className="w-full text-center text-xs text-ink/60 hover:text-walnut underline transition-colors py-1 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Add Gift to Cart &amp; View Cart
+                or add to cart &amp; view cart
               </button>
             </div>
 
-            {/* TRUST BADGE */}
-            <div className="pt-4 border-t border-brass/20 text-[11px] text-ink/60 space-y-1.5">
+            {/* LUXURY TRUST NOTES */}
+            <div className="pt-4 border-t border-beige/60 text-[11px] text-ink/60 space-y-2">
               <p className="flex items-center gap-2">
-                <Icon n="truck" className="w-4 h-4 text-brass shrink-0" />
-                <span>Nationwide trackable delivery via courier</span>
+                <Icon n="truck" className="w-3.5 h-3.5 text-walnut shrink-0" />
+                <span>Trackable courier delivery across Pakistan</span>
               </p>
               <p className="flex items-center gap-2">
-                <Icon n="box" className="w-4 h-4 text-brass shrink-0" />
-                <span>Damage-proof double protective outer packaging</span>
+                <Icon n="box" className="w-3.5 h-3.5 text-walnut shrink-0" />
+                <span>Double-protected outer parcel for zero damage</span>
               </p>
               <p className="flex items-center gap-2">
-                <Icon n="cash" className="w-4 h-4 text-brass shrink-0" />
-                <span>Card, JazzCash &amp; COD payment options at checkout</span>
+                <Icon n="cash" className="w-3.5 h-3.5 text-walnut shrink-0" />
+                <span>Cash on Delivery &amp; online payment accepted</span>
               </p>
             </div>
+
           </div>
         </div>
+
       </div>
     </div>
   )
