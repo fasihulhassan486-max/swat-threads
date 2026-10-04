@@ -55,44 +55,44 @@ export default function Couple() {
     inCart(men.id) || inCart(women.id)
 
   return (
-    <div className="max-w-6xl mx-auto px-5 py-12">
+    <div className="container-x py-8 sm:py-12">
 
       {/* ─── LUXURY HERO BANNER ─── */}
-      <div className="bg-coal text-white relative overflow-hidden mb-14 p-8 md:p-12">
+      <div className="bg-coal text-white relative overflow-hidden mb-8 sm:mb-14 p-5 sm:p-8 md:p-12">
         {/* Decorative grain overlay */}
         <div className="absolute inset-0 opacity-5 pointer-events-none"
           style={{ backgroundImage: 'repeating-linear-gradient(45deg, #B08D57 0 1px, transparent 1px 14px)' }} />
 
         <div className="relative max-w-3xl">
           {/* BANNER LABEL */}
-          <div className="inline-flex items-center gap-3 mb-5">
-            <span className="h-px w-8 bg-brass" />
-            <span className="text-brass text-[11px] font-mono uppercase tracking-[0.3em]">
+          <div className="inline-flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+            <span className="h-px w-6 sm:w-8 bg-brass" />
+            <span className="text-brass text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.25em] sm:tracking-[0.3em]">
               His &amp; Hers Heirloom Set
             </span>
-            <span className="h-px w-8 bg-brass" />
+            <span className="h-px w-6 sm:w-8 bg-brass" />
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-light leading-tight mb-4">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-light leading-tight mb-3 sm:mb-4">
             Curated Pairs of<br className="hidden sm:block" /> Men's &amp; Women's Shawls
           </h1>
 
-          <p className="text-white/75 text-base leading-relaxed max-w-2xl mb-6">
+          <p className="text-white/75 text-xs sm:text-base leading-relaxed max-w-2xl mb-5 sm:mb-6">
             Every couple bundle includes a <span className="text-brass font-medium">Complimentary Traditional Swati Cap (for Her)</span> &amp; <span className="text-brass font-medium">Handmade Pakol (for Him)</span> — a combined <span className="text-brass font-medium">{pkr(FREE_GIFTS_VALUE)} value, yours absolutely free.</span>
           </p>
 
           {/* KEY OFFERS ROW */}
-          <div className="flex flex-wrap gap-4 text-xs">
-            <div className="flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-2">
-              <span className="text-brass text-base">✓</span>
+          <div className="flex flex-wrap gap-2 sm:gap-4 text-xs">
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-white/10 border border-white/20 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs">
+              <span className="text-brass text-sm sm:text-base">✓</span>
               <span>10% Couple Bundle Discount</span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-2">
-              <span className="text-brass text-base">✓</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-white/10 border border-white/20 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs">
+              <span className="text-brass text-sm sm:text-base">✓</span>
               <span>Free Swati Cap &amp; Handmade Pakol</span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-2">
-              <span className="text-brass text-base">✓</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-white/10 border border-white/20 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs">
+              <span className="text-brass text-sm sm:text-base">✓</span>
               <span>Each piece is one-of-one artisan crafted</span>
             </div>
           </div>
@@ -100,15 +100,15 @@ export default function Couple() {
       </div>
 
       {/* ─── SECTION HEADING ─── */}
-      <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-beige pb-6">
+      <div className="mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-beige pb-4 sm:pb-6">
         <div>
           <p className="eyebrow mb-1">
             {hasDedicatedBundles ? 'Curated Bundle Collection' : 'Available Paired Sets'}
           </p>
-          <h2 className="text-3xl font-serif text-ink">
+          <h2 className="text-2xl sm:text-3xl font-serif text-ink">
             {hasDedicatedBundles ? 'Select Your Bundle' : 'Men\'s & Women\'s Pairs'}
           </h2>
-          <p className="text-ink/70 text-sm mt-1">
+          <p className="text-ink/70 text-xs sm:text-sm mt-1">
             {loading
               ? 'Loading collection…'
               : hasDedicatedBundles
@@ -118,7 +118,7 @@ export default function Couple() {
                   : 'No bundles available right now — check back soon.'}
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-ink/60 bg-beige/50 border border-beige px-3 py-2">
+        <div className="flex items-center gap-2 text-xs text-ink/60 bg-beige/50 border border-beige px-3 py-2 self-start sm:self-auto">
           <Icon n="leaf" className="w-4 h-4 text-walnut shrink-0" />
           <span>Free gifts: Swati Cap + Pakol included in every bundle</span>
         </div>
@@ -130,7 +130,8 @@ export default function Couple() {
         </div>
       ) : hasDedicatedBundles ? (
         /* ─── DEDICATED COUPLE-BUNDLE PRODUCT GRID ─── */
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
           {bundleProducts.map(p => {
             const bundleDisc = p.originalPrice && p.originalPrice > p.price ? p.originalPrice - p.price : 0
             const isAdded = added === p.id
@@ -217,7 +218,7 @@ export default function Couple() {
         </div>
       ) : pairedBundles.length > 0 ? (
         /* ─── AUTO-PAIRED BUNDLE GRID (MEN + WOMEN PAIRS) ─── */
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {pairedBundles.map(({ id, men, women, discount, total }) => {
             const subtotal = men.price + women.price
             const isAdded = added === id

@@ -35,11 +35,18 @@ export function ProductCard({ p }: { p: Product }) {
         {sold && <div className="absolute inset-0 bg-coal/60 flex items-center justify-center text-white font-serif tracking-widest text-sm text-center px-4">SOLD — ONE OF ONE</div>}
       </Link>
       <div className="mt-3 flex justify-between items-start gap-2">
-        <div><p className="text-[11px] uppercase tracking-widest text-ink/70">1 of 1 · {p.sku}</p>
-          <Link to={`/product/${p.id}`} className="font-serif text-lg text-ink">{p.name}</Link>
-          <p className="text-sm text-ink">{pkr(p.price)}</p></div>
-        <button aria-label="Wishlist" onClick={() => toggleWish(p.id)} className={liked ? 'text-brass' : 'text-ink/70'}><Icon n="heart" fill={liked} /></button>
-      </div></div>)
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] uppercase tracking-widest text-ink/70">1 of 1 · {p.sku}</p>
+          <Link to={`/product/${p.id}`} className="font-serif text-lg text-ink block truncate">{p.name}</Link>
+          <p className="text-sm text-ink">{pkr(p.price)}</p>
+        </div>
+        <button aria-label="Wishlist" onClick={() => toggleWish(p.id)} className={`p-2 -mr-1.5 transition-colors ${liked ? 'text-brass' : 'text-ink/70 hover:text-ink'}`}>
+          <Icon n="heart" fill={liked} />
+        </button>
+      </div>
+    </div>
+  )
 }
 export const Grid = ({ items }: { items: Product[] }) => (
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-10">{items.map(p => <ProductCard key={p.id} p={p} />)}</div>)
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-5 gap-y-8 sm:gap-y-10">{items.map(p => <ProductCard key={p.id} p={p} />)}</div>
+)
