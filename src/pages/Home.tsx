@@ -97,50 +97,6 @@ export default function Home() {
       <Grid items={products.slice(0, 4)} />
     </section>
 
-    {/* SWAT MOUNTAINS & ORIGINS GALLERY SECTION */}
-    <section className="bg-coal text-white py-20">
-      <div className="container-x">
-        <div className="max-w-2xl mb-12">
-          <p className="eyebrow !text-brass">Heritage &amp; Origins</p>
-          <h2 className="text-4xl font-light text-white mt-1 mb-3">The Mountains of Swat</h2>
-          <p className="text-white/75 text-base leading-relaxed">
-            Nestled in the high Hindu Kush and Himalayan ranges of northern Pakistan, the serene valleys of Swat shape every thread we weave. Discover the landscapes behind our authentic shawls.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {mountainTypes.map((mt) => (
-            <div 
-              key={mt.id} 
-              onClick={() => setActiveMountain(mt)}
-              className="group cursor-pointer bg-[#202421] border border-white/10 hover:border-brass/50 transition-all duration-300 overflow-hidden flex flex-col"
-            >
-              <div className="relative h-64 overflow-hidden bg-coal">
-                <Img src={mt.image} alt={mt.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#202421] via-transparent to-black/20" />
-                <span className="absolute top-4 left-4 bg-coal/80 backdrop-blur text-brass text-xs px-3 py-1 border border-brass/30 tracking-wider uppercase font-sans">
-                  {mt.elevation}
-                </span>
-                <span className="absolute bottom-3 right-3 text-xs text-white/80 bg-black/50 px-2 py-1 rounded flex items-center gap-1 group-hover:text-brass transition-colors">
-                  <Icon n="check" className="w-3 h-3 text-brass" /> Click to view
-                </span>
-              </div>
-              <div className="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <p className="text-brass text-xs uppercase tracking-widest font-sans mb-1">{mt.tag}</p>
-                  <h3 className="text-2xl font-serif text-white mb-2 group-hover:text-brass transition-colors">{mt.name}</h3>
-                  <p className="text-white/70 text-sm leading-relaxed mb-4">{mt.desc}</p>
-                </div>
-                <div className="pt-3 border-t border-white/10 text-xs text-brass flex items-center gap-1">
-                  <span>Explore mountain landscape</span> →
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
     {/* CATEGORY BANNER GRID */}
     <section className="container-x grid md:grid-cols-3 gap-5 py-16">
       <Link to="/shop?category=men" className="bg-coal text-white p-12 min-h-[240px] flex flex-col justify-end group hover:bg-[#232724] transition-colors relative overflow-hidden">
@@ -195,6 +151,50 @@ export default function Home() {
       <div className="flex gap-3 justify-center flex-wrap">
         <Link to="/shop" className="btn-primary">Explore Collection</Link>
         <Link to="/contact" className="btn-outline">Talk to us</Link>
+      </div>
+    </section>
+
+    {/* SWAT MOUNTAINS & ORIGINS GALLERY SECTION */}
+    <section className="bg-coal text-white py-20">
+      <div className="container-x">
+        <div className="max-w-2xl mb-12">
+          <p className="eyebrow !text-brass">Heritage &amp; Origins</p>
+          <h2 className="text-4xl font-light text-white mt-1 mb-3">The Mountains of Swat</h2>
+          <p className="text-white/75 text-base leading-relaxed">
+            Nestled in the high Hindu Kush and Himalayan ranges of northern Pakistan, the serene valleys of Swat shape every thread we weave. Discover the landscapes behind our authentic shawls.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {mountainTypes.map((mt) => (
+            <div 
+              key={mt.id} 
+              onClick={() => setActiveMountain(mt)}
+              className="group cursor-pointer bg-[#202421] border border-white/10 hover:border-brass/50 transition-all duration-300 overflow-hidden flex flex-col"
+            >
+              <div className="relative h-64 overflow-hidden bg-coal">
+                <Img src={mt.image} alt={mt.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#202421] via-transparent to-black/20" />
+                <span className="absolute top-4 left-4 bg-coal/80 backdrop-blur text-brass text-xs px-3 py-1 border border-brass/30 tracking-wider uppercase font-sans">
+                  {mt.elevation}
+                </span>
+                <span className="absolute bottom-3 right-3 text-xs text-white/80 bg-black/50 px-2 py-1 rounded flex items-center gap-1 group-hover:text-brass transition-colors">
+                  <Icon n="check" className="w-3 h-3 text-brass" /> Click to view
+                </span>
+              </div>
+              <div className="p-6 flex-1 flex flex-col justify-between">
+                <div>
+                  <p className="text-brass text-xs uppercase tracking-widest font-sans mb-1">{mt.tag}</p>
+                  <h3 className="text-2xl font-serif text-white mb-2 group-hover:text-brass transition-colors">{mt.name}</h3>
+                  <p className="text-white/70 text-sm leading-relaxed mb-4">{mt.desc}</p>
+                </div>
+                <div className="pt-3 border-t border-white/10 text-xs text-brass flex items-center gap-1">
+                  <span>Explore mountain landscape</span> →
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 
