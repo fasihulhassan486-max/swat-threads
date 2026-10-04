@@ -39,11 +39,11 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
       {/* ─── ANNOUNCEMENT BAR: FREE SHIPPING ─── */}
-      <div className="bg-[#1C1F1D] text-white/90 text-[11px] text-center py-2.5 px-4 flex items-center justify-center gap-2 tracking-wide font-sans">
+      <div className="bg-[#1C1F1D] text-white/90 text-[11px] py-2.5 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans">
         <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a1.5 1.5 0 1 0 0-3M17 19a1.5 1.5 0 1 0 0-3" />
         </svg>
-        <span className="leading-tight">
+        <span className="leading-none whitespace-nowrap">
           <span className="text-brass font-medium">Complimentary Express Shipping</span>
           {' '}on all orders above{' '}
           <span className="text-brass font-medium">PKR 5,000</span>
@@ -52,34 +52,34 @@ export default function Layout() {
       </div>
 
       {/* ─── ANNOUNCEMENT BAR: GIFTING ─── */}
-      <div className="bg-walnut text-white/90 text-xs text-center py-2 px-4">
-        <Link to="/gifting" className="hover:text-white transition-colors block sm:inline">
+      <div className="bg-walnut text-white/90 text-xs text-center py-2 px-4 sm:px-6 lg:px-12">
+        <Link to="/gifting" className="hover:text-white transition-colors inline whitespace-nowrap">
           Gifting a shawl? Add heirloom packaging with your own handwritten card →
         </Link>
       </div>
 
       {/* ─── MAIN HEADER ─── */}
       <header className="sticky top-0 z-40 bg-ivory border-b border-beige">
-        <div className="container-x h-16 sm:h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-ink">
-            <svg viewBox="0 0 40 24" className="w-8 h-5 sm:w-9 sm:h-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3">
+        <div className="mx-auto max-w-7xl px-6 lg:px-12 h-16 sm:h-20 md:h-[72px] flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 text-ink shrink-0">
+            <svg viewBox="0 0 40 24" className="w-8 h-5 sm:w-10 sm:h-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3">
               <path d="M2 22 14 6l8 10 5-6 11 12" />
             </svg>
             <span className="leading-none">
-              <span className="block font-serif text-xl sm:text-2xl tracking-[0.25em] sm:tracking-[0.3em]">VIRAS</span>
-              <span className="block text-[8px] sm:text-[9px] tracking-[0.35em] text-ink/70 mt-1">SWAT VALLEY · HERITAGE SHAWLS</span>
+              <span className="block font-serif text-xl sm:text-2xl lg:text-[1.35rem] tracking-[0.25em] sm:tracking-[0.3em]">VIRAS</span>
+              <span className="block text-[8px] sm:text-[9px] tracking-[0.35em] text-ink/70 mt-1 whitespace-nowrap">SWAT VALLEY · HERITAGE SHAWLS</span>
             </span>
           </Link>
 
-          <nav className="hidden lg:flex gap-7 text-[11px] uppercase tracking-[0.18em] text-ink">
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[11px] uppercase tracking-[0.18em] text-ink">
             {nav.map(([l, t]) => (
-              <NavLink key={l} to={t} className="hover:text-brass py-2 transition-colors">
+              <NavLink key={l} to={t} className="hover:text-brass py-1.5 whitespace-nowrap transition-colors">
                 {l}
               </NavLink>
             ))}
           </nav>
 
-          <div className="flex items-center gap-1 sm:gap-3 text-ink">
+          <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 text-ink shrink-0">
             <Link
               to="/shop?wishlist=1"
               aria-label="Wishlist"

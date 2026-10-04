@@ -58,7 +58,7 @@ export default function Home() {
   return (
     <>
       {/* HERO SECTION */}
-      <section className="relative min-h-[80vh] sm:min-h-[88vh] flex items-center overflow-hidden text-white bg-coal">
+      <section className="relative min-h-[85vh] md:min-h-[85vh] md:max-h-[900px] flex items-center overflow-hidden text-white bg-coal">
         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
           <defs>
             <radialGradient id="glow" cx="75%" cy="30%" r="45%"><stop offset="0" stopColor="#B08D57" stopOpacity=".35" /><stop offset="1" stopColor="#B08D57" stopOpacity="0" /></radialGradient>
@@ -76,18 +76,18 @@ export default function Home() {
         <Img src={site.heroImage} alt="Misty mountains of Swat Valley" className="absolute inset-0 w-full h-full object-cover" />
         <Img src={site.heroModels} alt="A man and a woman wearing handwoven Swat shawls" className="absolute right-0 bottom-0 h-full w-full md:w-[55%] object-cover md:object-contain object-right-bottom opacity-35 md:opacity-100" />
         <div className="absolute inset-0 bg-gradient-to-r from-coal/95 via-coal/70 to-coal/40 md:to-transparent" />
-        <div className="relative container-x w-full py-16 sm:py-24">
-          <div className="max-w-xl">
-            <p className="eyebrow !text-brass">VIRAS · Swat Valley, Pakistan</p>
-            <h1 className="text-3xl sm:text-5xl md:text-7xl font-light leading-[1.1] my-4 sm:my-6">
+        <div className="relative container-x w-full py-20 sm:py-28 lg:py-32">
+          <div className="max-w-xl lg:max-w-2xl">
+            <p className="eyebrow !text-brass mb-3">VIRAS · Swat Valley, Pakistan</p>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-[1.08] my-4 sm:my-6">
               Heritage,<br />Woven for Today.
             </h1>
-            <p className="text-white/85 mb-6 sm:mb-9 text-base sm:text-lg leading-relaxed">
+            <p className="text-white/85 mb-7 sm:mb-10 text-base sm:text-lg lg:text-xl leading-relaxed max-w-lg">
               Handcrafted shawls from Swat Valley, made for modern wardrobes, meaningful gifting, and moments worth keeping.
             </p>
-            <div className="flex gap-3 flex-wrap">
-              <Link to="/shop?category=men" className="btn-dark-fill">Men's Collection</Link>
-              <Link to="/shop?category=women" className="btn-dark-outline">Women's Collection</Link>
+            <div className="flex gap-3 sm:gap-4 flex-wrap">
+              <Link to="/shop?category=men" className="btn-dark-fill px-8 py-3.5">Men's Collection</Link>
+              <Link to="/shop?category=women" className="btn-dark-outline px-8 py-3.5">Women's Collection</Link>
             </div>
           </div>
         </div>
@@ -95,74 +95,76 @@ export default function Home() {
 
       {/* TRUST BADGES */}
       <section className="bg-beige">
-        <div className="container-x py-5 sm:py-6 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-ink text-xs sm:text-sm">
+        <div className="container-x py-5 sm:py-7 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-ink text-xs sm:text-sm">
           {trust.map(([i, l]) => (
-            <div key={l} className="flex items-center gap-2 justify-center py-1">
+            <div key={l} className="flex items-center gap-2 sm:gap-3 justify-center py-1">
               <Icon n={i} className="w-4 h-4 sm:w-5 sm:h-5 text-brass shrink-0" />
-              <span className="text-center font-medium sm:font-normal">{l}</span>
+              <span className="font-medium sm:font-normal whitespace-nowrap">{l}</span>
             </div>
           ))}
         </div>
       </section>
 
       {/* FEATURED PRODUCTS */}
-      <section className="container-x py-10 sm:py-16">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2 mb-6 sm:mb-8">
+      <section className="container-x py-12 sm:py-16 lg:py-20">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2 mb-8 sm:mb-10">
           <div>
             <p className="eyebrow">Featured</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl text-ink">The Selected Shawls</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl text-ink mt-1">The Selected Shawls</h2>
             <span className="block w-10 h-px bg-brass mt-2 sm:mt-3" />
           </div>
-          <Link to="/shop" className="text-ink text-xs sm:text-sm hover:text-brass py-1">View all →</Link>
+          <Link to="/shop" className="text-ink text-xs sm:text-sm hover:text-brass py-1 shrink-0">View all →</Link>
         </div>
         <Grid items={products.slice(0, 4)} />
       </section>
 
       {/* CATEGORY BANNER GRID */}
-      <section className="container-x grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 py-8 sm:py-16">
-        <Link to="/shop?category=men" className="bg-coal text-white p-6 sm:p-8 md:p-12 min-h-[180px] sm:min-h-[240px] flex flex-col justify-end group hover:bg-[#232724] transition-colors relative overflow-hidden">
+      <section className="container-x grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 py-10 sm:py-16 lg:py-20">
+        <Link to="/shop?category=men" className="bg-coal text-white p-8 sm:p-10 lg:p-12 min-h-[200px] sm:min-h-[260px] flex flex-col justify-end group hover:bg-[#232724] transition-colors relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-2xl sm:text-3xl font-serif">Men's Shawls</h3>
-            <p className="text-white/80 mt-1 text-sm">Handwoven wool shawls for warmth and understated elegance.</p>
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-serif">Men's Shawls</h3>
+            <p className="text-white/80 mt-1.5 text-sm sm:text-base">Handwoven wool shawls for warmth and understated elegance.</p>
           </div>
         </Link>
-        <Link to="/shop?category=women" className="bg-brass text-coal p-6 sm:p-8 md:p-12 min-h-[180px] sm:min-h-[240px] flex flex-col justify-end group hover:bg-[#c19d65] transition-colors relative overflow-hidden">
+        <Link to="/shop?category=women" className="bg-brass text-coal p-8 sm:p-10 lg:p-12 min-h-[200px] sm:min-h-[260px] flex flex-col justify-end group hover:bg-[#c19d65] transition-colors relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-2xl sm:text-3xl font-serif">Women's Shawls</h3>
-            <p className="text-coal/80 mt-1 text-sm">Soft wool &amp; Swiss Lawn shawls for modern wardrobes.</p>
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-serif">Women's Shawls</h3>
+            <p className="text-coal/80 mt-1.5 text-sm sm:text-base">Soft wool &amp; Swiss Lawn shawls for modern wardrobes.</p>
           </div>
         </Link>
-        <Link to="/couple-bundle" className="bg-beige text-ink p-6 sm:p-8 md:p-12 min-h-[180px] sm:min-h-[240px] flex flex-col justify-end border border-brass group hover:bg-[#f3ede3] transition-colors relative overflow-hidden">
+        <Link to="/couple-bundle" className="bg-beige text-ink p-8 sm:p-10 lg:p-12 min-h-[200px] sm:min-h-[260px] flex flex-col justify-end border border-brass group hover:bg-[#f3ede3] transition-colors relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-2xl sm:text-3xl font-serif">Couple Bundle</h3>
-            <p className="text-ink/70 mt-1 text-sm">His &amp; hers heirloom set — 10% savings &amp; complimentary Swati gifts.</p>
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-serif">Couple Bundle</h3>
+            <p className="text-ink/70 mt-1.5 text-sm sm:text-base">His &amp; hers heirloom set — 10% savings &amp; complimentary Swati gifts.</p>
           </div>
         </Link>
       </section>
 
       {/* CUSTOMIZATION CTA */}
       <section className="bg-beige">
-        <div className="container-x py-10 sm:py-16 text-center max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl text-ink mb-3 sm:mb-4">Customize Your Own Shawl</h2>
-          <p className="text-ink/70 mb-6 text-sm sm:text-base leading-relaxed">
-            Choose a shawl from our artisan collection and make it your own. Select your preferred color, finish, fabric, or dimensions. Custom orders are prepared within 8–10 days before dispatch.
-          </p>
-          <Link to="/customize" className="btn-primary">Start a custom order</Link>
+        <div className="container-x py-12 sm:py-16 lg:py-20 text-center">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl text-ink mb-3 sm:mb-4">Customize Your Own Shawl</h2>
+            <p className="text-ink/70 mb-7 sm:mb-8 text-sm sm:text-base leading-relaxed">
+              Choose a shawl from our artisan collection and make it your own. Select your preferred color, finish, fabric, or dimensions. Custom orders are prepared within 8–10 days before dispatch.
+            </p>
+            <Link to="/customize" className="btn-primary px-10 py-4">Start a custom order</Link>
+          </div>
         </div>
       </section>
 
       {/* CRAFTSMANSHIP & HERITAGE */}
       <section className="bg-coal text-white">
-        <div className="container-x py-10 sm:py-16">
-          <h2 className="text-2xl sm:text-3xl text-center font-serif">Heritage in Every Thread</h2>
-          <p className="text-white/80 max-w-2xl mx-auto text-center mt-3 sm:mt-4 mb-8 sm:mb-10 text-sm sm:text-base">
+        <div className="container-x py-12 sm:py-16 lg:py-20">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl text-center font-serif">Heritage in Every Thread</h2>
+          <p className="text-white/80 max-w-2xl mx-auto text-center mt-3 sm:mt-4 mb-8 sm:mb-12 text-sm sm:text-base">
             Each shawl is sourced directly from Swat artisans, chosen by hand, inspected, and packed with care.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {feats.map(([l, i]) => (
-              <div key={l} className="border border-white/15 p-4 sm:p-6 text-center bg-white/5">
-                <Icon n={i} className="w-6 h-6 sm:w-7 sm:h-7 text-brass mx-auto mb-2 sm:mb-3" />
-                <p className="font-serif text-xs sm:text-sm">{l}</p>
+              <div key={l} className="border border-white/15 p-5 sm:p-7 text-center bg-white/5">
+                <Icon n={i} className="w-6 h-6 sm:w-8 sm:h-8 text-brass mx-auto mb-3 sm:mb-4" />
+                <p className="font-serif text-xs sm:text-sm lg:text-base">{l}</p>
               </div>
             ))}
           </div>
@@ -170,34 +172,36 @@ export default function Home() {
       </section>
 
       {/* FOOTER CTA */}
-      <section className="container-x py-12 sm:py-20 text-center max-w-xl">
-        <h2 className="text-3xl sm:text-4xl text-ink mb-3 font-serif">Find Your Shawl</h2>
-        <p className="text-ink/70 mb-6 text-sm sm:text-base">A small, considered collection — handcrafted in Swat Valley and made to be kept.</p>
-        <div className="flex gap-3 justify-center flex-wrap">
-          <Link to="/shop" className="btn-primary">Explore Collection</Link>
-          <Link to="/contact" className="btn-outline">Talk to us</Link>
+      <section className="container-x py-14 sm:py-20 lg:py-24 text-center">
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl text-ink mb-3 font-serif">Find Your Shawl</h2>
+          <p className="text-ink/70 mb-7 sm:mb-8 text-sm sm:text-base">A small, considered collection — handcrafted in Swat Valley and made to be kept.</p>
+          <div className="flex gap-3 sm:gap-4 justify-center flex-wrap">
+            <Link to="/shop" className="btn-primary px-8 py-3.5">Explore Collection</Link>
+            <Link to="/contact" className="btn-outline px-8 py-3.5">Talk to us</Link>
+          </div>
         </div>
       </section>
 
       {/* SWAT MOUNTAINS & ORIGINS GALLERY SECTION */}
-      <section className="bg-coal text-white py-12 sm:py-20">
+      <section className="bg-coal text-white py-14 sm:py-20 lg:py-24">
         <div className="container-x">
-          <div className="max-w-2xl mb-8 sm:mb-12">
+          <div className="max-w-2xl mb-10 sm:mb-14">
             <p className="eyebrow !text-brass">Heritage &amp; Origins</p>
-            <h2 className="text-3xl sm:text-4xl font-light text-white mt-1 mb-3">The Mountains of Swat</h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mt-2 mb-3">The Mountains of Swat</h2>
             <p className="text-white/75 text-sm sm:text-base leading-relaxed">
               Nestled in the high Hindu Kush and Himalayan ranges of northern Pakistan, the serene valleys of Swat shape every thread we weave. Discover the landscapes behind our authentic shawls.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {mountainTypes.map((mt) => (
               <div 
                 key={mt.id} 
                 onClick={() => setActiveMountain(mt)}
                 className="group cursor-pointer bg-[#202421] border border-white/10 hover:border-brass/50 transition-all duration-300 overflow-hidden flex flex-col"
               >
-                <div className="relative h-56 sm:h-64 overflow-hidden bg-coal">
+                <div className="relative h-56 sm:h-64 lg:h-72 overflow-hidden bg-coal">
                   <Img src={mt.image} alt={mt.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#202421] via-transparent to-black/20" />
                   <span className="absolute top-4 left-4 bg-coal/80 backdrop-blur text-brass text-[11px] sm:text-xs px-2.5 sm:px-3 py-1 border border-brass/30 tracking-wider uppercase font-sans">
@@ -207,7 +211,7 @@ export default function Home() {
                     <Icon n="check" className="w-3 h-3 text-brass" /> Click to view
                   </span>
                 </div>
-                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+                <div className="p-5 sm:p-7 flex-1 flex flex-col justify-between">
                   <div>
                     <p className="text-brass text-xs uppercase tracking-widest font-sans mb-1">{mt.tag}</p>
                     <h3 className="text-xl sm:text-2xl font-serif text-white mb-2 group-hover:text-brass transition-colors">{mt.name}</h3>
