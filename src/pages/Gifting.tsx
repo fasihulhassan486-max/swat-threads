@@ -64,13 +64,13 @@ export default function Gifting() {
       recipientName: recipientName.trim(),
       senderName: senderName.trim(),
       message: customMessage.trim(),
-      packaging: 'Signature Heirloom Box, Satin Ribbon & Handwritten Card — PKR 390',
+      packaging: 'Signature Gift Packaging, Satin Ribbon & Handwritten Card — PKR 390',
       packagingPrice: 390,
       occasion: occasion.trim(),
     }
 
     const packingSummary = [
-      'Packaging: Signature Heirloom Box, Satin Ribbon & Handwritten Card — PKR 390',
+      'Packaging: Signature Gift Packaging, Satin Ribbon & Handwritten Card — PKR 390',
       recipientName && `To: ${recipientName.trim()}`,
       senderName && `From: ${senderName.trim()}`,
       occasion && `Occasion: ${occasion.trim()}`,
@@ -86,12 +86,12 @@ export default function Gifting() {
     <div className="container-x py-8 sm:py-12">
       {/* PAGE HEADER */}
       <div className="max-w-2xl mb-8 sm:mb-12">
-        <p className="eyebrow mb-2">Bespoke Gifting · Swat Valley</p>
+        <p className="eyebrow mb-2">Thoughtful Gifting · Swat Valley</p>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-light text-ink tracking-tight mb-3">
           Gift a Handwoven Shawl
         </h1>
         <p className="text-ink/70 text-sm sm:text-base leading-relaxed">
-          Choose an authentic piece of Swat heritage. Each gift is presented in our signature heirloom wooden box with your personalized handwritten card.
+          A thoughtful piece of Swat, beautifully packed and ready to gift.
         </p>
       </div>
 
@@ -245,7 +245,7 @@ export default function Gifting() {
             <div className="mb-6 pb-4 border-b border-beige/60">
               <span className="text-[11px] font-mono tracking-widest text-walnut uppercase block">Step 02</span>
               <h2 className="text-xl sm:text-2xl font-serif text-ink">Signature Gift Packaging</h2>
-              <p className="text-xs text-ink/70 mt-1">Artisan wooden box presentation prepared for every gift order.</p>
+              <p className="text-xs text-ink/70 mt-1">Present your shawl beautifully with a quality gift box and personalized handwritten card.</p>
             </div>
 
             {/* SINGLE ELEGANT PACKAGING CARD */}
@@ -257,30 +257,30 @@ export default function Gifting() {
                       Fixed Add-on
                     </span>
                     <span className="text-[10px] text-ink/60 uppercase tracking-wider font-sans">
-                      Artisan Wooden Presentation
+                      Gift Packaging
                     </span>
                   </div>
 
                   <h3 className="font-serif text-lg sm:text-xl text-ink">
-                    Signature Heirloom Box, Satin Ribbon &amp; Handwritten Card — PKR 390
+                    Signature Gift Packaging, Satin Ribbon &amp; Handwritten Card — PKR 390
                   </h3>
                   
                   <p className="text-xs sm:text-sm text-ink/75 leading-relaxed pt-1">
-                    Every piece is placed inside our handcrafted solid pine wooden box from Swat Valley, nestled in soft unbleached muslin cloth, finished with an artisan brass latch, and tied with our signature forest-green ribbon.
+                    Your shawl will be carefully folded and placed in a clean, presentable gift box, finished with thoughtful packaging and your personalized handwritten message.
                   </p>
 
                   <div className="pt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-ink/70">
                     <div className="flex items-center gap-1.5">
                       <span className="text-walnut font-bold">✓</span>
-                      <span>Handmade Pine Box</span>
+                      <span>Presentable Gift Box</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-walnut font-bold">✓</span>
-                      <span>Archival Cotton Card</span>
+                      <span>Protective Shawl Packaging</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-walnut font-bold">✓</span>
-                      <span>Muslin Fabric Lining</span>
+                      <span>Personalized Handwritten Gift Card</span>
                     </div>
                   </div>
                 </div>
@@ -299,7 +299,7 @@ export default function Gifting() {
               <span className="text-[11px] font-mono tracking-widest text-walnut uppercase block">Step 03</span>
               <h2 className="text-xl sm:text-2xl font-serif text-ink">Personalize Your Gift Card</h2>
               <p className="text-xs text-ink/70 mt-1">
-                Your message is penned on heavy textured archival cardstock and sealed inside the box.
+                Add a personal message and we'll handwrite it on your gift card.
               </p>
             </div>
 
@@ -380,7 +380,7 @@ export default function Gifting() {
           <div className="bg-white border border-beige/80 p-4 sm:p-6 md:p-8 shadow-sm space-y-5 sm:space-y-6">
             
             <div className="pb-4 border-b border-beige/60">
-              <span className="eyebrow block mb-1">Heirloom Edition</span>
+              <span className="eyebrow block mb-1">Your Gift Order</span>
               <h2 className="text-xl sm:text-2xl font-serif text-ink">Gift Summary</h2>
             </div>
 
@@ -402,23 +402,19 @@ export default function Gifting() {
               </div>
             )}
 
-            {/* PACKAGING INCLUSIONS */}
+            {/* PRICING LINE ITEMS */}
             <div className="space-y-2 text-xs text-ink/75 pt-1">
               <div className="flex justify-between items-center">
-                <span>Handwoven Swat Shawl</span>
-                <span className="font-medium text-ink">{pkr(totalPrice)}</span>
+                <span>Selected Shawl</span>
+                <span className="font-medium text-ink">{selectedProduct ? pkr(productPrice) : '—'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Signature Wooden Heirloom Box</span>
-                <span className="text-walnut font-medium">Included (Free)</span>
+                <span>Signature Gift Packaging</span>
+                <span className="font-medium text-ink">{pkr(PACKAGING_PRICE)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Handwritten Archival Card &amp; Seal</span>
-                <span className="text-walnut font-medium">Included (Free)</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Muslin Fabric Wrap &amp; Ribbon</span>
-                <span className="text-walnut font-medium">Included (Free)</span>
+                <span>Personalized Handwritten Gift Card</span>
+                <span className="text-walnut font-medium">Included</span>
               </div>
             </div>
 
@@ -452,9 +448,9 @@ export default function Gifting() {
               </div>
             </div>
 
-            {/* TOTAL INVESTMENT */}
+            {/* TOTAL */}
             <div className="pt-3 sm:pt-4 border-t border-beige/60 flex justify-between items-baseline">
-              <span className="font-serif text-base sm:text-lg text-ink">Total Investment</span>
+              <span className="font-serif text-base sm:text-lg text-ink">Total</span>
               <span className="font-serif text-2xl sm:text-3xl text-ink font-semibold">{pkr(totalPrice)}</span>
             </div>
 
@@ -466,7 +462,7 @@ export default function Gifting() {
                 onClick={() => handleCheckout('/checkout')}
                 className="btn-primary w-full py-3.5 sm:py-4 px-6 text-center text-xs tracking-[0.2em] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <span>Add Gift Box to Cart &amp; Checkout</span>
+                <span>Add Gift to Cart &amp; Checkout</span>
                 <span>→</span>
               </button>
 
@@ -476,7 +472,7 @@ export default function Gifting() {
                 onClick={() => handleCheckout('/cart')}
                 className="w-full text-center text-xs text-ink/60 hover:text-walnut underline transition-colors py-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                or add to cart &amp; view cart
+                or add to cart &amp; view cart →
               </button>
             </div>
 
