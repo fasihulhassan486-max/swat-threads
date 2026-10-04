@@ -58,7 +58,7 @@ export default function Home() {
   return (
     <>
       {/* HERO SECTION */}
-      <section className="relative min-h-[85vh] md:min-h-[85vh] md:max-h-[900px] flex items-center overflow-hidden text-white bg-coal">
+      <section className="relative min-h-[85vh] lg:min-h-[85vh] lg:max-h-[800px] flex items-center overflow-hidden text-white bg-coal">
         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
           <defs>
             <radialGradient id="glow" cx="75%" cy="30%" r="45%"><stop offset="0" stopColor="#B08D57" stopOpacity=".35" /><stop offset="1" stopColor="#B08D57" stopOpacity="0" /></radialGradient>
@@ -76,9 +76,9 @@ export default function Home() {
         <Img src={site.heroImage} alt="Misty mountains of Swat Valley" className="absolute inset-0 w-full h-full object-cover" />
         <Img src={site.heroModels} alt="A man and a woman wearing handwoven Swat shawls" className="absolute right-0 bottom-0 h-full w-full md:w-[55%] object-cover md:object-contain object-right-bottom opacity-35 md:opacity-100" />
         <div className="absolute inset-0 bg-gradient-to-r from-coal/95 via-coal/70 to-coal/40 md:to-transparent" />
-        <div className="relative container-x w-full py-20 sm:py-28 lg:py-32">
-          <div className="max-w-xl lg:max-w-2xl">
-            <p className="eyebrow !text-brass mb-3">VIRAS · Swat Valley, Pakistan</p>
+        <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-12 py-16 sm:py-24 lg:py-28">
+          <div className="max-w-xl lg:max-w-2xl text-left">
+            <p className="eyebrow !text-brass mb-3 sm:mb-4">VIRAS · Swat Valley, Pakistan</p>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-[1.08] my-4 sm:my-6">
               Heritage,<br />Woven for Today.
             </h1>
