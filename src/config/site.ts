@@ -13,7 +13,9 @@ export const site = {
   metaPixelId: (env.VITE_META_PIXEL_ID as string) ?? '', // Meta (Facebook/Instagram) Pixel
   giftBoxPrice: 500, coupleDiscount: 0.1, advanceRate: 0.5,
   wc: { // WooCommerce — set these in .env (see .env.example)
-    url: (env.VITE_WC_URL as string) ?? '', key: (env.VITE_WC_KEY as string) ?? '', secret: (env.VITE_WC_SECRET as string) ?? '',
+    url: (env.VITE_WORDPRESS_URL as string) ?? (env.VITE_WC_URL as string) ?? '',
+    key: (env.VITE_WC_CONSUMER_KEY as string) ?? (env.VITE_WC_KEY as string) ?? '',
+    secret: (env.VITE_WC_CONSUMER_SECRET as string) ?? (env.VITE_WC_SECRET as string) ?? '',
     orderProxy: (env.VITE_ORDER_PROXY_URL as string) ?? '',
     paymentIds: { card: 'card', jazzcash: 'jazzcash', cod: 'cod' } as Record<string, string>, // your WooCommerce gateway IDs
   },

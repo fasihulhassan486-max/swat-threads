@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import type { Line, Product } from '../types'
+import type { Category, Line, Product } from '../types'
 import { products as mock } from '../data/products'
-import { fetchProducts, wooEnabled } from '../lib/woocommerce'
 import { track } from '../lib/analytics'
 interface Store {
   products: Product[]; loading: boolean; lines: Line[]; wishlist: string[]
@@ -15,13 +14,75 @@ interface Store {
 const Ctx = createContext<Store>(null as unknown as Store)
 export const useStore = () => useContext(Ctx)
 const load = <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') as T } catch { return d } }
+const stripHtml = (html: string) =>
+  (html || '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&#8217;/g, '’')
+    .trim()
+
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(wooEnabled ? [] : mock)
-  const [loading, setLoading] = useState(wooEnabled)
+  const isWooConfigured = Boolean(import.meta.env.VITE_WORDPRESS_URL)
+  const [products, setProducts] = useState<Product[]>(isWooConfigured ? [] : mock)
+  const [loading, setLoading] = useState(isWooConfigured)
   const [lines, setLines] = useState<Line[]>(() => load('st-lines', []))
   const [wishlist, setWish] = useState<string[]>(() => load('st-wish', []))
   const [sold, setSold] = useState<string[]>(() => load('st-sold', []))
-  useEffect(() => { if (wooEnabled) fetchProducts().then(setProducts).catch(console.error).finally(() => setLoading(false)) }, [])
+  useEffect(() => {
+    const wpUrl = import.meta.env.VITE_WORDPRESS_URL
+    const consumerKey = import.meta.env.VITE_WC_CONSUMER_KEY
+    const consumerSecret = import.meta.env.VITE_WC_CONSUMER_SECRET
+
+    if (!wpUrl) {
+      setLoading(false)
+      return
+    }
+
+    const baseUrl = wpUrl.replace(/\/$/, '')
+    const endpoint = `${baseUrl}/wp-json/wc/v3/products?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`
+
+    const loadProducts = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(endpoint)
+        if (!response.ok) {
+          throw new Error(`WooCommerce API responded with status ${response.status}: ${response.statusText}`)
+        }
+        const data = await response.json()
+
+        const mappedProducts: Product[] = (Array.isArray(data) ? data : []).map((item: any): Product => {
+          const price = parseFloat(item.price || item.regular_price || '0') || 0
+          const regularPrice = item.regular_price ? parseFloat(item.regular_price) : 0
+          const originalPrice = regularPrice > price ? regularPrice : undefined
+          const firstImage = item.images?.[0]?.src || ''
+          const allImages = (item.images || []).map((img: any) => img.src).filter(Boolean)
+
+          return {
+            id: String(item.id),
+            sku: item.sku || `ST-${item.id}`,
+            name: stripHtml(item.name || ''),
+            price,
+            originalPrice,
+            category: (item.categories?.[0]?.slug || 'men') as Category,
+            badge: item.tags?.[0]?.name || (item.featured ? 'Featured' : undefined),
+            description: stripHtml(item.short_description || item.description || ''),
+            tone: '#8a8478',
+            stockQuantity: item.stock_status === 'outofstock' ? 0 : (item.stock_quantity ?? 1),
+            image: firstImage,
+            images: allImages.length > 0 ? allImages : (firstImage ? [firstImage] : []),
+          }
+        })
+
+        setProducts(mappedProducts)
+      } catch (err) {
+        console.error('Failed to fetch WooCommerce products:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProducts()
+  }, [])
   useEffect(() => { localStorage.setItem('st-lines', JSON.stringify(lines)); localStorage.setItem('st-wish', JSON.stringify(wishlist)); localStorage.setItem('st-sold', JSON.stringify(sold)) }, [lines, wishlist, sold])
   const inStock = (p: Product) => p.stockQuantity > 0 && !sold.includes(p.id)
   const inCart = (id: string) => lines.some(l => l.productId === id)

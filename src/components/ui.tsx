@@ -14,7 +14,10 @@ export const Icon = ({ n, className = 'w-5 h-5', fill = false }: { n: string; cl
   <svg viewBox="0 0 24 24" className={className} fill={fill ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={P[n]} /></svg>)
 export const Swatch = ({ tone, v = 0, className = '' }: { tone: string; v?: number; className?: string }) => (
   <div className={`w-full h-full ${className}`} style={{ background: `repeating-linear-gradient(${45 + v * 30}deg, ${tone} 0 6px, ${tone}dd 6px 7px), ${tone}` }} />)
-export const Media = ({ p, v = 0 }: { p: Product; v?: number }) => p.images[v] ? <img src={p.images[v]} alt={p.name} className="w-full h-full object-cover" /> : <Swatch tone={p.tone} v={v} />
+export const Media = ({ p, v = 0 }: { p: Product; v?: number }) => {
+  const src = p.images?.[v] || (v === 0 ? p.image : undefined)
+  return src ? <img src={src} alt={p.name} className="w-full h-full object-cover" /> : <Swatch tone={p.tone} v={v} />
+}
 export function GiftFields({ gift, note, packing, onChange }: { gift: boolean; note: string; packing: string; onChange: (g: boolean, n: string, pk: string) => void }) {
   return (<div className="space-y-2 text-sm">
     <label className="flex items-center gap-2"><input type="checkbox" checked={gift} onChange={e => onChange(e.target.checked, note, packing)} /> Heirloom pine wooden gift box — +{pkr(site.giftBoxPrice)}</label>
