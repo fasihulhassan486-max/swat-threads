@@ -1,8 +1,25 @@
 import type { Line } from '../types'
 import { site } from '../config/site'
-export const SIZE_EXTRA: Record<string, number> = { Standard: 0, Large: 1500 }
-export const PATTERN_EXTRA: Record<string, number> = { Plain: 0, 'Border stripe': 1000, 'Hand embroidery': 2500 }
-export const customPrice = (base: number, size: string, pattern: string) => base + SIZE_EXTRA[size] + PATTERN_EXTRA[pattern]
+export const SIZE_EXTRA: Record<string, number> = {
+  Standard: 0,
+  'Standard Size': 0,
+  Large: 1500,
+  'Custom Dimensions': 1500,
+}
+export const PATTERN_EXTRA: Record<string, number> = {
+  Plain: 0,
+  'Plain Finish': 0,
+  Border: 1000,
+  'Border stripe': 1000,
+  'Handwoven Border': 1000,
+  'Traditional Pattern': 1500,
+  Embroidered: 2500,
+  'Embroidered Finish': 2500,
+  'Hand embroidery': 2500,
+  Custom: 1500,
+}
+export const customPrice = (base: number, size: string = 'Standard Size', pattern: string = 'Plain') =>
+  base + (SIZE_EXTRA[size] ?? 0) + (PATTERN_EXTRA[pattern] ?? 0)
 export const SHIPPING_FEE = 300
 export const FREE_SHIPPING_THRESHOLD = 5000
 export const calcShipping = (subtotal: number) => subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE

@@ -27,7 +27,28 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
   const meta = (o: Record<string, string | undefined>) => Object.entries(o).filter(([, v]) => v).map(([key, value]) => ({ key, value }))
   const fee = (name: string, total: number, m: Record<string, string | undefined> = {}) => ({ name, total: String(total), tax_status: 'none', meta_data: meta(m) })
   const fees = [
-    ...lines.filter(l => l.custom).map(l => fee(l.name, l.unit, { Color: l.custom!.color, Size: l.custom!.size, Pattern: l.custom!.pattern, 'Artisan instructions': l.custom!.notes })),
+    ...lines.filter(l => l.custom).map(l => {
+      const c = l.custom!
+      return fee(l.name, l.unit, {
+        'Customization Type': c.customizationType,
+        Color: c.customColor ? `Custom: ${c.customColor}` : c.color,
+        'Custom Color': c.customColor,
+        Size: c.customDimensions ? `Custom Dimensions: ${c.customDimensions}` : c.size,
+        'Custom Dimensions': c.customDimensions,
+        'Style / Finish': c.styleFinish || c.style || c.pattern,
+        Fabric: c.fabric,
+        'Special Instructions': c.specialInstructions || c.notes,
+        'Reference Image': c.referenceImage,
+        "Men's Color": c.mensCustomColor ? `Custom: ${c.mensCustomColor}` : c.mensColor,
+        "Men's Design": c.mensDesign,
+        "Men's Request": c.mensSpecialRequest,
+        "Women's Fabric": c.womensFabric,
+        "Women's Color": c.womensCustomColor ? `Custom: ${c.womensCustomColor}` : c.womensColor,
+        "Women's Design": c.womensDesign,
+        "Women's Request": c.womensSpecialRequest,
+        'Shared Couple Customization': c.sharedCoupleCustomization,
+      })
+    }),
     ...lines.filter(l => l.gift).map(l => fee(l.giftDetails?.packaging || 'Heirloom gift box', l.giftDetails?.packagingPrice ?? site.giftBoxPrice, { 'Recipient': l.giftDetails?.recipientName, 'Sender': l.giftDetails?.senderName, 'Gift message': l.giftDetails?.message || l.note, 'Packaging': l.giftDetails?.packaging || l.packing, 'Occasion': l.giftDetails?.occasion, For: l.name })),
     ...(t.discount > 0 ? [fee('Couple bundle discount (10%)', -t.discount)] : []),
   ]

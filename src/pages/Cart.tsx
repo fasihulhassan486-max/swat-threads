@@ -88,10 +88,37 @@ export default function Cart() {
                   <div className="flex-1 min-w-0 text-sm">
                     <p className="font-serif text-base sm:text-lg text-ink truncate">{l.name}</p>
                     {l.custom && (
-                      <p className="text-xs sm:text-sm text-ink/70">
-                        {l.custom.color} · {l.custom.size} · {l.custom.pattern}
-                        {l.custom.notes && ` · "${l.custom.notes}"`}
-                      </p>
+                      <div className="text-xs sm:text-sm text-ink/75 my-1 space-y-0.5 bg-ivory/60 border border-beige/60 p-2.5 rounded-sm">
+                        {l.custom.customizationType === 'couple' ? (
+                          <>
+                            <p className="font-medium text-ink">Couple Customization</p>
+                            <p><span className="text-ink/60">Men's:</span> {l.custom.mensCustomColor ? `Custom (${l.custom.mensCustomColor})` : l.custom.mensColor} · {l.custom.mensDesign}</p>
+                            {l.custom.mensSpecialRequest && <p className="italic text-ink/60">“{l.custom.mensSpecialRequest}”</p>}
+                            <p><span className="text-ink/60">Women's:</span> {l.custom.womensFabric} · {l.custom.womensCustomColor ? `Custom (${l.custom.womensCustomColor})` : l.custom.womensColor} · {l.custom.womensDesign}</p>
+                            {l.custom.womensSpecialRequest && <p className="italic text-ink/60">“{l.custom.womensSpecialRequest}”</p>}
+                            {l.custom.sharedCoupleCustomization && (
+                              <p className="border-t border-beige/60 pt-1 mt-1 text-walnut font-medium">Coordination: “{l.custom.sharedCoupleCustomization}”</p>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <p>
+                              {l.custom.fabric && <span>{l.custom.fabric} · </span>}
+                              <span>{l.custom.customColor ? `Custom (${l.custom.customColor})` : l.custom.color}</span>
+                              <span> · {l.custom.customDimensions ? `Custom (${l.custom.customDimensions})` : l.custom.size}</span>
+                              <span> · {l.custom.styleFinish || l.custom.style || l.custom.pattern}</span>
+                            </p>
+                            {(l.custom.specialInstructions || l.custom.notes) && (
+                              <p className="italic text-ink/70">“{l.custom.specialInstructions || l.custom.notes}”</p>
+                            )}
+                            {l.custom.referenceImage && (
+                              <p className="text-[11px] text-brass flex items-center gap-1">
+                                <span>📎 Reference:</span> {l.custom.referenceImage}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
                     )}
                     <p className="text-xs sm:text-sm mt-0.5">1 × {pkr(l.unit)}</p>
                     {l.colorNote && <p className="text-xs text-ink/70 mt-0.5">{l.colorNote}</p>}

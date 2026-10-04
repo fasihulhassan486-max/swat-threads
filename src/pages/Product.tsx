@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { GiftFields, Icon, Media } from '../components/ui'
+import { Icon, Media } from '../components/ui'
 import { pkr } from '../lib/format'
 import { track } from '../lib/analytics'
 
@@ -10,9 +10,6 @@ export default function Product() {
   const { products, loading, inStock, inCart, addProduct, wishlist, toggleWish } = useStore()
   const p = products.find(x => x.id === id)
   const [v, setV] = useState(0)
-  const [gift, setGift] = useState(false)
-  const [note, setNote] = useState('')
-  const [packing, setPacking] = useState('')
 
   useEffect(() => {
     if (p) track('ViewContent', { content_ids: [p.id], value: p.price, currency: 'PKR' })
@@ -62,18 +59,6 @@ export default function Product() {
             )}
           </div>
 
-          {ok && (
-            <div className="border border-brass/50 bg-beige/60 p-4 sm:p-5 mt-4">
-              <p className="font-serif text-ink mb-2">Gifting this shawl?</p>
-              <GiftFields
-                gift={gift}
-                note={note}
-                packing={packing}
-                onChange={(g, n, pk) => { setGift(g); setNote(n); setPacking(pk) }}
-              />
-            </div>
-          )}
-
           <p className="text-ink/75 my-5 text-sm sm:text-base leading-relaxed">{p.description}</p>
           <p className={`text-xs sm:text-sm mb-6 ${ok ? 'text-emerald-700 font-medium' : 'text-ink/60'}`}>
             {ok ? '● In stock — only one piece available' : '○ Sold — one of one'}
@@ -83,7 +68,7 @@ export default function Product() {
             <button
               className="btn-primary flex-1 py-3.5 px-6 min-h-[48px]"
               disabled={!ok || inCart(p.id)}
-              onClick={() => addProduct(p, gift, gift ? note : '', gift ? packing : '')}
+              onClick={() => addProduct(p)}
             >
               {!ok ? 'Sold' : inCart(p.id) ? 'In your cart' : 'Add to Cart'}
             </button>
@@ -94,6 +79,16 @@ export default function Product() {
             >
               <Icon n="heart" fill={wishlist.includes(p.id)} />
             </button>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-beige">
+            <Link
+              to={`/customize?id=${p.id}`}
+              className="w-full border border-walnut/50 text-walnut hover:bg-walnut hover:text-white py-3 px-4 text-xs tracking-[0.18em] uppercase transition-colors flex items-center justify-center gap-2 rounded-sm"
+            >
+              <span>Customize This {p.category === 'women' ? "Women's" : p.category === 'couple-bundle' ? 'Couple' : "Men's"} Shawl</span>
+              <span>→</span>
+            </Link>
           </div>
         </div>
       </div>
