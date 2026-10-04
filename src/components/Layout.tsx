@@ -12,7 +12,20 @@ export default function Layout() {
   useEffect(() => { setOpen(false); window.scrollTo(0, 0); track('PageView') }, [pathname])
   const info = [['Our Story', '/our-story'], ['Contact', '/contact'], ['Shipping', '/shipping'], ['Returns', '/returns'], ['Privacy', '/privacy'], ['Terms', '/terms']]
   return (<div className="min-h-screen flex flex-col">
-    <div className="bg-coal text-white text-xs text-center py-2 px-3"><Link to="/gifting" className="hover:underline">Gifting a shawl? Add heirloom gift packaging with your own note →</Link></div>
+    {/* ─── ANNOUNCEMENT BAR: FREE SHIPPING ─── */}
+    <div className="bg-[#1C1F1D] text-white/90 text-[11px] text-center py-2.5 px-3 flex items-center justify-center gap-2 tracking-wide font-sans">
+      <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a1.5 1.5 0 1 0 0-3M17 19a1.5 1.5 0 1 0 0-3" />
+      </svg>
+      <span>
+        <span className="text-brass font-medium">Complimentary Express Shipping</span>
+        {' '}on all orders above{' '}
+        <span className="text-brass font-medium">PKR 5,000</span>
+        {' '}across Pakistan
+      </span>
+    </div>
+    {/* ─── ANNOUNCEMENT BAR: GIFTING ─── */}
+    <div className="bg-walnut text-white/90 text-xs text-center py-2 px-3"><Link to="/gifting" className="hover:text-white transition-colors">Gifting a shawl? Add heirloom packaging with your own handwritten card →</Link></div>
     <header className="sticky top-0 z-40 bg-ivory border-b border-beige">
       <div className="container-x h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-ink"><svg viewBox="0 0 40 24" className="w-9 h-6" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M2 22 14 6l8 10 5-6 11 12" /></svg><span className="leading-none"><span className="block font-serif text-2xl tracking-[0.3em]">SWAT THREADS</span><span className="block text-[9px] tracking-[0.35em] text-ink/70 mt-1">HANDWOVEN SHAWLS</span></span></Link>
