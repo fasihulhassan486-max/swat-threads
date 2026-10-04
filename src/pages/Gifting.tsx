@@ -51,8 +51,10 @@ export default function Gifting() {
     return products.find(p => p.id === selectedId) || null
   }, [products, selectedId])
 
-  // Total price (Signature packaging is complimentary / included)
-  const totalPrice = selectedProduct ? selectedProduct.price : 0
+  // Fixed Packaging Price & Total
+  const PACKAGING_PRICE = 390
+  const productPrice = selectedProduct ? selectedProduct.price : 0
+  const totalPrice = selectedProduct ? productPrice + PACKAGING_PRICE : PACKAGING_PRICE
 
   // Handle Checkout & Cart
   const handleCheckout = (destination: '/checkout' | '/cart' = '/checkout') => {
@@ -62,13 +64,13 @@ export default function Gifting() {
       recipientName: recipientName.trim(),
       senderName: senderName.trim(),
       message: customMessage.trim(),
-      packaging: 'Signature Heirloom Box with Satin Ribbon & Handwritten Card',
-      packagingPrice: 0,
+      packaging: 'Signature Heirloom Box, Satin Ribbon & Handwritten Card — PKR 390',
+      packagingPrice: 390,
       occasion: occasion.trim(),
     }
 
     const packingSummary = [
-      'Packaging: Signature Heirloom Box (Complimentary)',
+      'Packaging: Signature Heirloom Box, Satin Ribbon & Handwritten Card — PKR 390',
       recipientName && `To: ${recipientName.trim()}`,
       senderName && `From: ${senderName.trim()}`,
       occasion && `Occasion: ${occasion.trim()}`,
@@ -238,29 +240,29 @@ export default function Gifting() {
             )}
           </section>
 
-          {/* STEP 2: SIGNATURE GIFT PACKAGING (DEFAULT INCLUDED) */}
+          {/* STEP 2: SIGNATURE GIFT PACKAGING */}
           <section className="bg-white border border-beige/70 p-6 md:p-8 shadow-sm">
             <div className="mb-6 pb-4 border-b border-beige/60">
               <span className="text-[11px] font-mono tracking-widest text-walnut uppercase block">Step 02</span>
               <h2 className="text-2xl font-serif text-ink">Signature Gift Packaging</h2>
-              <p className="text-xs text-ink/70 mt-1">Included with every bespoke gift order.</p>
+              <p className="text-xs text-ink/70 mt-1">Artisan wooden box presentation prepared for every gift order.</p>
             </div>
 
             {/* SINGLE ELEGANT PACKAGING CARD */}
-            <div className="border border-walnut/30 bg-[#FAF7F2] p-6 relative overflow-hidden">
+            <div className="border border-walnut/40 bg-[#FAF7F2] p-6 relative overflow-hidden">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="space-y-2 max-w-lg">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="bg-walnut/10 text-walnut text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 border border-walnut/20">
-                      Complimentary Included
+                    <span className="bg-walnut text-white text-[10px] font-mono uppercase tracking-widest px-2 py-0.5">
+                      Fixed Add-on
                     </span>
-                    <span className="text-[10px] text-ink/50 uppercase tracking-wider font-sans">
-                      Standard on all gifts
+                    <span className="text-[10px] text-ink/60 uppercase tracking-wider font-sans">
+                      Artisan Wooden Presentation
                     </span>
                   </div>
 
                   <h3 className="font-serif text-xl text-ink">
-                    Signature Heirloom Box with Satin Ribbon &amp; Handwritten Card
+                    Signature Heirloom Box, Satin Ribbon &amp; Handwritten Card — PKR 390
                   </h3>
                   
                   <p className="text-sm text-ink/75 leading-relaxed pt-1">
@@ -269,23 +271,23 @@ export default function Gifting() {
 
                   <div className="pt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-ink/70">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-walnut">✓</span>
+                      <span className="text-walnut font-bold">✓</span>
                       <span>Handmade Pine Box</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-walnut">✓</span>
+                      <span className="text-walnut font-bold">✓</span>
                       <span>Archival Cotton Card</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-walnut">✓</span>
+                      <span className="text-walnut font-bold">✓</span>
                       <span>Muslin Fabric Lining</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="sm:text-right shrink-0">
-                  <span className="font-serif text-lg text-walnut font-medium">Free</span>
-                  <span className="block text-[11px] text-ink/50 line-through">PKR 500</span>
+                <div className="sm:text-right shrink-0 bg-white/80 border border-beige px-3 py-2 rounded-sm">
+                  <span className="block text-[11px] uppercase tracking-wider text-ink/60 font-sans">Packaging</span>
+                  <span className="font-serif text-xl text-walnut font-semibold">PKR 390</span>
                 </div>
               </div>
             </div>
