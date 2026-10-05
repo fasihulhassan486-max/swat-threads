@@ -39,21 +39,21 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
       {/* ─── ANNOUNCEMENT BAR: FREE SHIPPING ─── */}
-      <div className="bg-[#1C1F1D] text-white/90 text-[11px] md:text-xs py-2.5 md:py-3 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 md:gap-3 tracking-wide font-sans">
-        <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <div className="bg-[#1C1F1D] text-white/90 text-xs py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans">
+        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a1.5 1.5 0 1 0 0-3M17 19a1.5 1.5 0 1 0 0-3" />
         </svg>
-        <span className="leading-tight sm:leading-none text-center sm:whitespace-nowrap">
-          <span className="text-brass font-medium">Complimentary Express Shipping</span>
+        <span className="leading-none text-center sm:whitespace-nowrap">
+          <span className="text-brass font-semibold">Complimentary Express Shipping</span>
           {' '}on all orders above{' '}
-          <span className="text-brass font-medium">PKR 5,000</span>
+          <span className="text-brass font-semibold">PKR 5,000</span>
           {' '}across Pakistan
         </span>
       </div>
 
       {/* ─── ANNOUNCEMENT BAR: GIFTING ─── */}
-      <div className="bg-walnut text-white/90 text-xs md:text-[13px] text-center py-2 md:py-2.5 px-4 sm:px-6 lg:px-12 flex items-center justify-center">
-        <Link to="/gifting" className="hover:text-white transition-colors inline-flex items-center gap-1 sm:whitespace-nowrap leading-tight">
+      <div className="bg-walnut text-white/90 text-xs text-center py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center">
+        <Link to="/gifting" className="hover:text-white transition-colors inline-flex items-center gap-1.5 sm:whitespace-nowrap leading-none">
           <span>Gifting a shawl? Add heirloom packaging with your own handwritten card</span>
           <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
         </Link>
@@ -72,7 +72,7 @@ export default function Layout() {
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[11px] xl:text-xs uppercase tracking-[0.18em] xl:tracking-[0.2em] font-medium text-ink">
+          <nav className="hidden lg:flex items-center gap-7 xl:gap-10 text-xs xl:text-sm uppercase tracking-widest font-medium text-ink">
             {nav.map(([l, t]) => (
               <NavLink
                 key={l}

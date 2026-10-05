@@ -153,59 +153,95 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     const baseUrl = wpUrl.replace(/\/$/, '')
-    const endpoint = `${baseUrl}/wp-json/wc/store/v1/products?per_page=100`
+    const storeEndpoint = `${baseUrl}/wp-json/wc/store/v1/products?per_page=100`
+    const consumerKey = import.meta.env.VITE_WC_CONSUMER_KEY || ''
+    const consumerSecret = import.meta.env.VITE_WC_CONSUMER_SECRET || ''
+    const v3Endpoint = `${baseUrl}/wp-json/wc/v3/products?per_page=100&consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`
+
+    const mapItem = (item: any, isV3 = false): Product => {
+      const div = isV3 ? 1 : 10 ** (item.prices?.currency_minor_unit ?? 0)
+      const price = isV3
+        ? (parseFloat(item.price || item.regular_price || '0') || 0)
+        : (item.prices?.price ? Number(item.prices.price) / div : (parseFloat(item.price || item.regular_price || '0') || 0))
+      const regularPrice = isV3
+        ? (item.regular_price ? parseFloat(item.regular_price) : 0)
+        : (item.prices?.regular_price ? Number(item.prices.regular_price) / div : (item.regular_price ? parseFloat(item.regular_price) : 0))
+      const originalPrice = regularPrice > price ? regularPrice : undefined
+
+      const allImages: string[] = (item.images || [])
+        .map((img: any) => (typeof img === 'string' ? img : img?.src || img?.src))
+        .filter(Boolean)
+      const firstImage = allImages[0] || ''
+
+      const name = stripHtml(item.name || '')
+      const { category, categories } = parseWooCategories(item.categories, name)
+
+      const stockQuantity = item.is_in_stock !== undefined
+        ? (item.is_in_stock ? 10 : 0)
+        : (item.stock_status === 'outofstock' ? 0 : (item.stock_quantity ?? 1))
+
+      return {
+        id: String(item.id),
+        sku: item.sku || `ST-${item.id}`,
+        name,
+        price,
+        originalPrice,
+        category,
+        categories,
+        badge: item.tags?.[0]?.name || (item.featured ? 'Featured' : undefined),
+        description: stripHtml(item.short_description || item.description || ''),
+        tone: '#8a8478',
+        stockQuantity,
+        image: firstImage,
+        images: allImages.length > 0 ? allImages : (firstImage ? [firstImage] : []),
+      }
+    }
 
     const loadProducts = async () => {
+      setLoading(true)
       try {
-        setLoading(true)
-        const response = await fetch(endpoint)
-        if (!response.ok) {
-          throw new Error(`WooCommerce Store API responded with status ${response.status}: ${response.statusText}`)
-        }
-        const data = await response.json()
+        // ── Primary: WooCommerce Store API (no auth needed) ──────────────
+        let usedFallback = false
+        let rawData: any[] = []
 
-        const mappedProducts: Product[] = (Array.isArray(data) ? data : []).map((item: any): Product => {
-          const div = 10 ** (item.prices?.currency_minor_unit ?? 0)
-          const price = item.prices?.price
-            ? Number(item.prices.price) / div
-            : (parseFloat(item.price || item.regular_price || '0') || 0)
-          const regularPrice = item.prices?.regular_price
-            ? Number(item.prices.regular_price) / div
-            : (item.regular_price ? parseFloat(item.regular_price) : 0)
-          const originalPrice = regularPrice > price ? regularPrice : undefined
-
-          const allImages: string[] = (item.images || [])
-            .map((img: any) => (typeof img === 'string' ? img : img?.src))
-            .filter(Boolean)
-          const firstImage = allImages[0] || ''
-
-          const name = stripHtml(item.name || '')
-          const { category, categories } = parseWooCategories(item.categories, name)
-
-          const stockQuantity = item.is_in_stock !== undefined
-            ? (item.is_in_stock ? 10 : 0)
-            : (item.stock_status === 'outofstock' ? 0 : (item.stock_quantity ?? 1))
-
-          return {
-            id: String(item.id),
-            sku: item.sku || `ST-${item.id}`,
-            name,
-            price,
-            originalPrice,
-            category,
-            categories,
-            badge: item.tags?.[0]?.name || (item.featured ? 'Featured' : undefined),
-            description: stripHtml(item.short_description || item.description || ''),
-            tone: '#8a8478',
-            stockQuantity,
-            image: firstImage,
-            images: allImages.length > 0 ? allImages : (firstImage ? [firstImage] : []),
+        try {
+          const res = await fetch(storeEndpoint)
+          if (res.ok) {
+            const json = await res.json()
+            if (Array.isArray(json) && json.length > 0) {
+              rawData = json
+            } else {
+              console.warn('[StoreContext] Store API returned empty array — trying v3 fallback.')
+              usedFallback = true
+            }
+          } else {
+            console.warn(`[StoreContext] Store API HTTP ${res.status} — trying v3 fallback.`)
+            usedFallback = true
           }
-        })
+        } catch (storeErr) {
+          console.warn('[StoreContext] Store API fetch error — trying v3 fallback.', storeErr)
+          usedFallback = true
+        }
 
+        // ── Fallback: wc/v3 REST API with consumer keys ──────────────────
+        if (usedFallback && consumerKey) {
+          try {
+            const res = await fetch(v3Endpoint)
+            if (res.ok) {
+              const json = await res.json()
+              if (Array.isArray(json)) {
+                rawData = json
+              }
+            } else {
+              console.error(`[StoreContext] v3 fallback also failed with HTTP ${res.status}.`)
+            }
+          } catch (v3Err) {
+            console.error('[StoreContext] v3 fallback fetch error:', v3Err)
+          }
+        }
+
+        const mappedProducts: Product[] = rawData.map(item => mapItem(item, usedFallback))
         setProducts(mappedProducts)
-      } catch (err) {
-        console.error('Failed to fetch WooCommerce products:', err)
       } finally {
         setLoading(false)
       }
