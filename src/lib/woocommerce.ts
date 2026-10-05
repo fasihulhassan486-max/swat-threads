@@ -1,5 +1,6 @@
 import { site } from '../config/site'
 import type { Line, Product } from '../types'
+import { parseWooCategories } from '../context/StoreContext'
 import type { totals } from './pricing'
 const base = site.wc.url.replace(/\/$/, '')
 export const wooEnabled = !!base
@@ -11,9 +12,10 @@ export async function fetchProducts(): Promise<Product[]> {
   const data = await res.json()
   return data.map((d: any): Product => {
     const div = 10 ** (d.prices?.currency_minor_unit ?? 0), price = Number(d.prices?.price) / div, reg = Number(d.prices?.regular_price) / div
-    const cats: string[] = (d.categories || []).map((c: any) => c.slug)
-    return { id: String(d.id), sku: d.sku || `ST-${d.id}`, name: strip(d.name), price, originalPrice: reg > price ? reg : undefined,
-      category: cats.includes('women') ? 'women' : 'men', badge: d.tags?.[0]?.name, description: strip(d.short_description || d.description || ''),
+    const name = strip(d.name)
+    const { category, categories } = parseWooCategories(d.categories, name)
+    return { id: String(d.id), sku: d.sku || `ST-${d.id}`, name, price, originalPrice: reg > price ? reg : undefined,
+      category, categories, badge: d.tags?.[0]?.name, description: strip(d.short_description || d.description || ''),
       tone: '#8a8478', stockQuantity: d.is_in_stock ? 1 : 0, images: (d.images || []).map((i: any) => i.src) }
   })
 }

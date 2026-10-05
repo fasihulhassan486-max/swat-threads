@@ -1,32 +1,41 @@
 import { useSearchParams } from 'react-router-dom'
-import { useStore } from '../context/StoreContext'
+import { useStore, matchesCategory } from '../context/StoreContext'
 import { Grid } from '../components/ui'
 
 export default function Shop() {
   const [q] = useSearchParams()
-  const cat = q.get('category')
+  const rawCat = q.get('category')
+  const cat = rawCat ? rawCat.trim().toLowerCase() : null
   const { products, wishlist, loading } = useStore()
 
   const isWishlist = Boolean(q.get('wishlist'))
   const list = isWishlist
     ? products.filter(p => wishlist.includes(p.id))
-    : products.filter(p => !cat || p.category === cat)
+    : products.filter(p => matchesCategory(p, cat))
+
+  const isMen = cat === 'men' || cat === 'mens'
+  const isWomen = cat === 'women' || cat === 'womens'
+  const isCouple = cat === 'couple-bundle' || cat === 'couple' || cat === 'couples'
 
   const title = isWishlist
     ? 'Your Wishlist'
-    : cat === 'men'
+    : isMen
       ? "Men's Shawls"
-      : cat === 'women'
+      : isWomen
         ? "Women's Shawls"
-        : 'The Collection'
+        : isCouple
+          ? 'Couple Bundles'
+          : 'The Collection'
 
   const subtitle = isWishlist
     ? 'Your saved artisan pieces from the VIRAS collection.'
-    : cat === 'men'
+    : isMen
       ? 'Handwoven wool shawls from Swat, designed for warmth, understated elegance, and everyday winter wear.'
-      : cat === 'women'
+      : isWomen
         ? 'Elegant shawls crafted in Swat, with wool and Swiss Lawn options for different seasons and styles.'
-        : 'Handcrafted shawls rooted in the heritage of Swat Valley, Pakistan, made for modern wardrobes and meant to be kept.'
+        : isCouple
+          ? 'Curated pairs of artisan shawls from Swat Valley, crafted for shared elegance and meaningful gifting.'
+          : 'Handcrafted shawls rooted in the heritage of Swat Valley, Pakistan, made for modern wardrobes and meant to be kept.'
 
   return (
     <div className="container-x py-8 sm:py-12">

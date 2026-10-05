@@ -21,6 +21,122 @@ const stripHtml = (html: string) =>
     .replace(/&#8217;/g, '’')
     .trim()
 
+export function parseWooCategories(
+  rawCategories: any,
+  productName = ''
+): { category: Category; categories: string[] } {
+  const catsArray = Array.isArray(rawCategories) ? rawCategories : []
+
+  const slugs: string[] = []
+  const names: string[] = []
+
+  for (const c of catsArray) {
+    if (typeof c === 'string' && c.trim()) {
+      slugs.push(c.trim().toLowerCase())
+    } else if (c && typeof c === 'object') {
+      if (typeof c.slug === 'string' && c.slug.trim()) {
+        slugs.push(c.slug.trim().toLowerCase())
+      }
+      if (typeof c.name === 'string' && c.name.trim()) {
+        names.push(c.name.trim().toLowerCase())
+      }
+    }
+  }
+
+  const allTokens = [...slugs, ...names]
+  const cleanName = (productName || '').toLowerCase()
+
+  const hasToken = (regex: RegExp, directSlugs: string[]) =>
+    allTokens.some(t => directSlugs.includes(t) || regex.test(t)) || regex.test(cleanName)
+
+  const isCouple = hasToken(
+    /(?:^|[\s_-])couples?(?:[\s_-]|$)|couple-bundle|his-and-hers/i,
+    ['couple-bundle', 'couple', 'couples', 'couple-set', 'couples-bundle']
+  )
+
+  const isWomen = hasToken(
+    /(?:^|[\s_-])womens?(?:[\s_'-]|$)/i,
+    ['women', 'womens', 'women-shawls', 'womens-shawls']
+  )
+
+  const isMen = hasToken(
+    /(?:^|[\s_-])mens?(?:[\s_'-]|$)/i,
+    ['men', 'mens', 'men-shawls', 'mens-shawls']
+  )
+
+  const isGifting = hasToken(
+    /(?:^|[\s_-])gifts?(?:ing)?(?:[\s_-]|$)/i,
+    ['gifting', 'gift', 'gifts']
+  )
+
+  let primaryCategory: Category = 'men'
+  if (isCouple) {
+    primaryCategory = 'couple-bundle'
+  } else if (isWomen) {
+    primaryCategory = 'women'
+  } else if (isGifting) {
+    primaryCategory = 'gifting'
+  } else if (isMen) {
+    primaryCategory = 'men'
+  } else if (slugs[0]) {
+    primaryCategory = slugs[0] as Category
+  }
+
+  const uniqueCategories = Array.from(
+    new Set([...slugs, primaryCategory].filter(Boolean))
+  )
+
+  return { category: primaryCategory, categories: uniqueCategories }
+}
+
+export function matchesCategory(product: Product, targetCategory: string | null): boolean {
+  if (!targetCategory || targetCategory === 'all') return true
+
+  const target = targetCategory.toLowerCase().trim()
+  const primary = (product.category || '').toLowerCase().trim()
+  const allCats = Array.from(
+    new Set([primary, ...(product.categories || []).map(c => c.toLowerCase().trim())])
+  ).filter(Boolean)
+
+  if (target === 'men' || target === 'mens') {
+    if (primary === 'men') return true
+    if (primary !== 'couple-bundle' && allCats.some(c => c === 'men' || c === 'mens' || /(?:^|[\s_-])mens?(?:[\s_'-]|$)/i.test(c))) {
+      return true
+    }
+    return false
+  }
+
+  if (target === 'women' || target === 'womens') {
+    if (primary === 'women') return true
+    if (primary !== 'couple-bundle' && allCats.some(c => c === 'women' || c === 'womens' || /(?:^|[\s_-])womens?(?:[\s_'-]|$)/i.test(c))) {
+      return true
+    }
+    return false
+  }
+
+  if (target === 'couple-bundle' || target === 'couple' || target === 'couples') {
+    if (primary === 'couple-bundle' || primary === 'couple') return true
+    return allCats.some(
+      c =>
+        c === 'couple-bundle' ||
+        c === 'couple' ||
+        c === 'couples' ||
+        /(?:^|[\s_-])couples?(?:[\s_-]|$)|couple-bundle|his-and-hers/i.test(c)
+    )
+  }
+
+  if (target === 'gifting' || target === 'gift') {
+    if (primary === 'gifting') return true
+    return allCats.some(c => c === 'gifting' || /(?:^|[\s_-])gifts?(?:ing)?(?:[\s_-]|$)/i.test(c))
+  }
+
+  return (
+    primary === target ||
+    allCats.includes(target) ||
+    allCats.some(c => c.includes(target) || target.includes(c))
+  )
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const isWooConfigured = Boolean(import.meta.env.VITE_WORDPRESS_URL)
   const [products, setProducts] = useState<Product[]>(isWooConfigured ? [] : mock)
@@ -63,13 +179,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             .filter(Boolean)
           const firstImage = allImages[0] || ''
 
-          const catSlugs = (item.categories || []).map((c: any) => c.slug || c.name?.toLowerCase() || '')
-          let category: Category = 'men'
-          if (catSlugs.some((s: string) => s.includes('couple'))) category = 'couple-bundle'
-          else if (catSlugs.some((s: string) => s.includes('women'))) category = 'women'
-          else if (catSlugs.some((s: string) => s.includes('gifting'))) category = 'gifting'
-          else if (catSlugs.some((s: string) => s.includes('men'))) category = 'men'
-          else if (item.categories?.[0]?.slug) category = item.categories[0].slug as Category
+          const name = stripHtml(item.name || '')
+          const { category, categories } = parseWooCategories(item.categories, name)
 
           const stockQuantity = item.is_in_stock !== undefined
             ? (item.is_in_stock ? 10 : 0)
@@ -78,10 +189,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return {
             id: String(item.id),
             sku: item.sku || `ST-${item.id}`,
-            name: stripHtml(item.name || ''),
+            name,
             price,
             originalPrice,
             category,
+            categories,
             badge: item.tags?.[0]?.name || (item.featured ? 'Featured' : undefined),
             description: stripHtml(item.short_description || item.description || ''),
             tone: '#8a8478',

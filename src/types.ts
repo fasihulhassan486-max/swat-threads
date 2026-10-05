@@ -1,5 +1,5 @@
-export type Category = 'men' | 'women' | string
-export interface Product { id: string; sku: string; name: string; price: number; originalPrice?: number; category: Category; badge?: string; description: string; tone: string; stockQuantity: number; images: string[]; image?: string }
+export type Category = 'men' | 'women' | 'couple-bundle' | 'gifting' | string
+export interface Product { id: string; sku: string; name: string; price: number; originalPrice?: number; category: Category; categories?: string[]; badge?: string; description: string; tone: string; stockQuantity: number; images: string[]; image?: string }
 export interface CustomSpec {
   baseId: string
   color: string
