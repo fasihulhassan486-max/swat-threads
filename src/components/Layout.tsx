@@ -39,7 +39,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
       {/* ─── ANNOUNCEMENT BAR: FREE SHIPPING ─── */}
-      <div className="bg-[#1C1F1D] text-white/90 text-xs py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans">
+      <div className="bg-[#1C1F1D] text-white/90 text-[12px] py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans">
         <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a1.5 1.5 0 1 0 0-3M17 19a1.5 1.5 0 1 0 0-3" />
         </svg>
@@ -52,7 +52,7 @@ export default function Layout() {
       </div>
 
       {/* ─── ANNOUNCEMENT BAR: GIFTING ─── */}
-      <div className="bg-walnut text-white/90 text-xs text-center py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center">
+      <div className="bg-walnut text-white/90 text-[12px] text-center py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center">
         <Link to="/gifting" className="hover:text-white transition-colors inline-flex items-center gap-1.5 sm:whitespace-nowrap leading-none">
           <span>Gifting a shawl? Add heirloom packaging with your own handwritten card</span>
           <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -67,12 +67,12 @@ export default function Layout() {
               <path d="M2 22 14 6l8 10 5-6 11 12" />
             </svg>
             <span className="leading-none">
-              <span className="block font-serif text-xl sm:text-2xl lg:text-[1.4rem] tracking-[0.25em] sm:tracking-[0.3em]">VIRAS</span>
-              <span className="block text-[8px] sm:text-[9px] tracking-[0.35em] text-ink/70 mt-1 whitespace-nowrap">SWAT VALLEY · HERITAGE SHAWLS</span>
+              <span className="block font-serif text-[22px] tracking-[0.3em]">VIRAS</span>
+              <span className="block text-[9px] tracking-[0.35em] text-ink/70 mt-1 whitespace-nowrap">SWAT VALLEY · HERITAGE SHAWLS</span>
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-7 xl:gap-10 text-xs xl:text-sm uppercase tracking-widest font-medium text-ink">
+          <nav className="hidden lg:flex items-center gap-8 text-[13px] uppercase tracking-[0.15em] font-medium text-ink">
             {nav.map(([l, t]) => (
               <NavLink
                 key={l}
