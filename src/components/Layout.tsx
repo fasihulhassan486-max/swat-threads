@@ -39,39 +39,43 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
       {/* ─── ANNOUNCEMENT BAR: FREE SHIPPING ─── */}
-      <div className="bg-[#1C1F1D] text-white/90 text-[12px] py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans">
+      <div className="bg-[#1C1F1D] text-white/90 text-[12px] py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans overflow-hidden">
         <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a1.5 1.5 0 1 0 0-3M17 19a1.5 1.5 0 1 0 0-3" />
         </svg>
-        <span className="leading-none text-center sm:whitespace-nowrap">
-          <span className="text-brass font-semibold">Complimentary Express Shipping</span>
-          {' '}on all orders above{' '}
+        <span className="leading-none text-center whitespace-nowrap truncate">
+          <span className="text-brass font-semibold">Free Shipping</span>
+          <span className="hidden sm:inline"> · Complimentary Express Shipping</span>
+          {' '}on orders above{' '}
           <span className="text-brass font-semibold">PKR 5,000</span>
-          {' '}across Pakistan
+          <span className="hidden sm:inline"> across Pakistan</span>
         </span>
       </div>
 
       {/* ─── ANNOUNCEMENT BAR: GIFTING ─── */}
-      <div className="bg-walnut text-white/90 text-[12px] text-center py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center">
-        <Link to="/gifting" className="hover:text-white transition-colors inline-flex items-center gap-1.5 sm:whitespace-nowrap leading-none">
-          <span>Gifting a shawl? Add heirloom packaging with your own handwritten card</span>
-          <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
+      <div className="bg-walnut text-white/90 text-[12px] text-center py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center overflow-hidden">
+        <Link to="/gifting" className="hover:text-white transition-colors inline-flex items-center gap-1.5 leading-none min-w-0">
+          <span className="truncate">Gifting a shawl? Add heirloom packaging with your own handwritten card</span>
+          <span className="shrink-0">→</span>
         </Link>
       </div>
 
       {/* ─── MAIN HEADER ─── */}
-      <header className="sticky top-0 z-40 bg-ivory border-b border-beige">
-        <div className="mx-auto max-w-7xl px-6 lg:px-12 py-4 md:py-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 text-ink shrink-0 group">
-            <svg viewBox="0 0 40 24" className="w-8 h-5 sm:w-10 sm:h-6 shrink-0 group-hover:text-brass transition-colors" fill="none" stroke="currentColor" strokeWidth="1.3">
+      <header className="sticky top-0 z-40 bg-ivory border-b border-beige w-full">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-3.5 md:py-5 flex items-center justify-between gap-2">
+
+          {/* ── Logo ──────────────────────────────────────────────── */}
+          <Link to="/" className="flex items-center gap-2 sm:gap-2.5 text-ink shrink-0 group min-w-0">
+            <svg viewBox="0 0 40 24" className="w-7 h-[18px] sm:w-9 sm:h-[22px] shrink-0 group-hover:text-brass transition-colors" fill="none" stroke="currentColor" strokeWidth="1.3">
               <path d="M2 22 14 6l8 10 5-6 11 12" />
             </svg>
-            <span className="leading-none">
-              <span className="block font-serif text-[22px] tracking-[0.3em]">VIRAS</span>
-              <span className="block text-[9px] tracking-[0.35em] text-ink/70 mt-1 whitespace-nowrap">SWAT VALLEY · HERITAGE SHAWLS</span>
+            <span className="leading-none min-w-0">
+              <span className="block font-serif text-[19px] sm:text-[22px] tracking-[0.28em] sm:tracking-[0.3em]">VIRAS</span>
+              <span className="hidden sm:block text-[9px] tracking-[0.35em] text-ink/70 mt-1 whitespace-nowrap">SWAT VALLEY · HERITAGE SHAWLS</span>
             </span>
           </Link>
 
+          {/* ── Desktop Nav ───────────────────────────────────────── */}
           <nav className="hidden lg:flex items-center gap-8 text-[13px] uppercase tracking-[0.15em] font-medium text-ink">
             {nav.map(([l, t]) => (
               <NavLink
@@ -88,15 +92,16 @@ export default function Layout() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 text-ink shrink-0">
+          {/* ── Right-side icons (wishlist · cart · hamburger) ────── */}
+          <div className="flex items-center shrink-0 text-ink">
             <Link
               to="/shop?wishlist=1"
               aria-label="Wishlist"
-              className="relative p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center hover:text-brass transition-colors"
+              className="relative p-2 sm:p-2.5 w-10 h-10 flex items-center justify-center hover:text-brass transition-colors"
             >
               <Icon n="heart" />
               {wishlist.length > 0 && (
-                <span className="absolute top-1 right-1 text-[10px] bg-brass text-coal rounded-full w-4 h-4 grid place-items-center font-bold">
+                <span className="absolute top-0.5 right-0.5 text-[9px] bg-brass text-coal rounded-full w-[15px] h-[15px] grid place-items-center font-bold leading-none">
                   {wishlist.length}
                 </span>
               )}
@@ -104,24 +109,25 @@ export default function Layout() {
             <Link
               to="/cart"
               aria-label="Cart"
-              className="relative p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center hover:text-brass transition-colors"
+              className="relative p-2 sm:p-2.5 w-10 h-10 flex items-center justify-center hover:text-brass transition-colors"
             >
               <Icon n="bag" />
-              <span className="absolute top-1 right-1 text-[10px] bg-coal text-white rounded-full w-4 h-4 grid place-items-center font-bold">
+              <span className="absolute top-0.5 right-0.5 text-[9px] bg-coal text-white rounded-full w-[15px] h-[15px] grid place-items-center font-bold leading-none">
                 {lines.length}
               </span>
             </Link>
+            {/* Hamburger — last DOM element, no negative margin */}
             <button
-              className="lg:hidden p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center text-ink hover:text-brass transition-colors"
+              className="lg:hidden p-2 sm:p-2.5 w-10 h-10 flex items-center justify-center text-ink hover:text-brass transition-colors"
               aria-label={open ? 'Close Menu' : 'Open Menu'}
               onClick={() => setOpen(!open)}
             >
               {open ? (
-                <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <Icon n="menu" className="w-6 h-6" />
+                <Icon n="menu" className="w-5 h-5 sm:w-6 sm:h-6" />
               )}
             </button>
           </div>
