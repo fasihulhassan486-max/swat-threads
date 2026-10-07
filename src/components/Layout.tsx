@@ -178,52 +178,121 @@ export default function Layout() {
 
       {/* ─── FOOTER ─── */}
       <footer className="bg-coal text-white/70 text-sm">
-        <div className="container-x py-12 sm:py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10">
-          <div className="sm:col-span-2 md:col-span-1">
-            <h4 className="text-white text-xl tracking-[0.25em] mb-3">VIRAS</h4>
+        <div className="container-x py-12 sm:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+
+          {/* Brand blurb */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <h4 className="text-white text-xl tracking-[0.25em] mb-1">VIRAS</h4>
+            <p className="text-[10px] tracking-[0.3em] text-brass/80 uppercase mb-3 font-mono">Swat Shawls</p>
             <p className="max-w-sm text-sm leading-relaxed">
               Handcrafted shawls rooted in the heritage of Swat Valley, Pakistan, made for modern wardrobes and meant to be kept.
             </p>
           </div>
+
+          {/* Shop links */}
           <div>
             <h5 className="text-brass text-xs uppercase tracking-[0.25em] mb-3 font-mono">Shop</h5>
             <ul className="space-y-2">
               {nav.slice(0, 4).map(([l, t]) => (
                 <li key={l}>
-                  <Link to={t} className="hover:text-white py-1 inline-block">
+                  <Link to={t} className="hover:text-white py-1 inline-block transition-colors">
                     {l}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
+          {/* Info links */}
           <div>
             <h5 className="text-brass text-xs uppercase tracking-[0.25em] mb-3 font-mono">Information</h5>
             <ul className="space-y-2">
               {info.map(([l, t]) => (
                 <li key={l}>
-                  <Link to={t} className="hover:text-white py-1 inline-block">
+                  <Link to={t} className="hover:text-white py-1 inline-block transition-colors">
                     {l}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
+          {/* Connect column */}
+          <div>
+            <h5 className="text-brass text-xs uppercase tracking-[0.25em] mb-3 font-mono">Connect</h5>
+            <ul className="space-y-2.5 mb-5">
+              <li>
+                <a
+                  href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(site.whatsappMessage)}`}
+                  target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2 hover:text-white transition-colors group"
+                >
+                  {/* WhatsApp icon */}
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 text-[#25D366] group-hover:scale-110 transition-transform" fill="currentColor">
+                    <path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm4.6 13.3c-.2.6-1.2 1.1-1.7 1.2-.5.1-1.1.1-3.5-.9-2.5-1.1-4-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5s.6-1.8.9-2c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .5.4l.7 1.8c.1.2.1.3 0 .5l-.4.5c-.1.1-.3.3-.1.5.7 1.1 1.5 1.8 2.5 2.3.3.1.4.1.6-.1l.7-.9c.2-.2.3-.2.5-.1l1.7.8c.2.1.3.2.4.3 0 .2 0 .7-.1 1.1z"/>
+                  </svg>
+                  <span className="text-sm">{site.phone}</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${site.email}`}
+                  className="flex items-center gap-2 hover:text-white transition-colors group"
+                >
+                  {/* Email icon */}
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 text-brass/80 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <path d="M2 7l10 7 10-7"/>
+                  </svg>
+                  <span className="text-sm break-all">{site.email}</span>
+                </a>
+              </li>
+            </ul>
+
+            {/* Social icon row */}
+            <div className="flex items-center gap-3">
+              {/* Facebook */}
+              <a
+                href={site.social.facebook}
+                target="_blank" rel="noreferrer"
+                aria-label="VIRAS on Facebook"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#1877F2] flex items-center justify-center transition-colors group"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+              </a>
+              {/* Instagram */}
+              <a
+                href={site.social.instagram}
+                target="_blank" rel="noreferrer"
+                aria-label="VIRAS on Instagram"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-gradient-to-br hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] flex items-center justify-center transition-all group"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </a>
+              {/* TikTok */}
+              <a
+                href={site.social.tiktok}
+                target="_blank" rel="noreferrer"
+                aria-label="VIRAS on TikTok"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-black flex items-center justify-center transition-colors group"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.53V6.77a4.85 4.85 0 0 1-1.02-.08z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
         </div>
 
-        <div className="container-x pb-6 flex flex-wrap gap-4 text-xs items-center">
-          {Object.entries(site.social).filter(([, u]) => u).map(([k, u]) => (
-            <a key={k} href={u} target="_blank" rel="noreferrer" className="capitalize hover:text-white py-1">
-              {k}
-            </a>
-          ))}
-          <a href={`mailto:${site.email}`} className="hover:text-white py-1">
-            {site.email}
-          </a>
-        </div>
-
+        {/* Bottom bar */}
         <div className="border-t border-white/10 py-4 container-x flex flex-col sm:flex-row justify-between gap-2 text-xs text-white/50">
-          <span>© {new Date().getFullYear()} VIRAS</span>
+          <span>© {new Date().getFullYear()} VIRAS | Swat Shawls</span>
           <span>Cash on Delivery &amp; Online Payment</span>
         </div>
       </footer>

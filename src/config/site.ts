@@ -1,10 +1,17 @@
 const env = import.meta.env
 export const site = {
-  name: 'VIRAS',
-  whatsapp: '923000000000', // country code + number, no "+"
+  name: 'VIRAS | Swat Shawls',
+  url: 'https://virasstore.com',
+  whatsapp: '923096424489', // country code + number, no "+"
   whatsappMessage: 'Assalam o Alaikum! I have an inquiry about a VIRAS shawl.',
-  email: 'yourbrand@gmail.com',
-  social: { instagram: 'https://instagram.com/yourhandle', facebook: 'https://facebook.com/yourpage', tiktok: 'https://tiktok.com/@yourhandle', youtube: '' } as Record<string, string>, // empty = hidden
+  email: 'virasstore486@gmail.com',
+  phone: '+92 309 6424489',
+  social: {
+    facebook: 'https://facebook.com/people/VIRAS/61594853384047/',
+    instagram: 'https://instagram.com/virasstore486/',
+    tiktok: 'https://tiktok.com/@virasstore486',
+    youtube: '',
+  } as Record<string, string>, // empty = hidden
   heroImage: '/images/swat-mountains.jpg', // or paste a full URL, e.g. from your WordPress Media Library
   heroModels: '/images/hero-models.png',
   heroVideo: '', // optional looping .mp4 for the home hero
