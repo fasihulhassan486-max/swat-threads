@@ -92,7 +92,7 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
 
   let paymentMethodTitle = method.toUpperCase()
   if (method === 'easypaisa') {
-    paymentMethodTitle = 'EasyPaisa (0329 6424489 - Fasih Ul Hassan)'
+    paymentMethodTitle = 'EasyPaisa (0309 6424489 - Fasih Ul Hassan)'
   } else if (method === 'cod') {
     paymentMethodTitle = 'Cash on Delivery (COD)'
   } else if (method === 'card') {
@@ -112,7 +112,7 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
   const notesList = [
     t.hasCustom ? `Custom order. Advance due now: PKR ${t.dueNow}. Balance on delivery: PKR ${t.balanceCOD}.` : '',
     c.deliveryInstructions ? `Delivery Instructions: ${c.deliveryInstructions}` : '',
-    method === 'easypaisa' ? 'Payment via EasyPaisa (0329 6424489 - Fasih Ul Hassan)' : '',
+    method === 'easypaisa' ? 'Payment via EasyPaisa (0309 6424489 - Fasih Ul Hassan)' : '',
   ].filter(Boolean).join(' | ')
 
   const body = {
@@ -143,7 +143,7 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
       cod_balance: String(t.balanceCOD),
       delivery_instructions: c.deliveryInstructions,
       estimated_delivery: '3 to 4 Working Days',
-      easypaisa_account: method === 'easypaisa' ? '0329 6424489 (Fasih Ul Hassan)' : undefined,
+      easypaisa_account: method === 'easypaisa' ? '0309 6424489 (Fasih Ul Hassan)' : undefined,
     }),
   }
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }

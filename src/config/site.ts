@@ -22,7 +22,7 @@ export const site = {
   shippingFee: 250,
   deliveryTime: '3 to 4 Working Days',
   easypaisa: {
-    number: '0329 6424489',
+    number: '0309 6424489',
     accountName: 'Fasih Ul Hassan',
   },
   wc: { // WooCommerce — set these in .env (see .env.example)

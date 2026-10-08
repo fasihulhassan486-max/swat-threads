@@ -31,7 +31,7 @@ export const customPrice = (base: number, size: string = 'Standard Size', patter
 
 export const SHIPPING_FEE = site.shippingFee ?? 250
 export const FREE_SHIPPING_THRESHOLD = 5000
-export const calcShipping = (_subtotal: number = 0) => SHIPPING_FEE
+export const calcShipping = (subtotal: number = 0) => subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
 
 export function bundleDiscount(men: number[], women: number[]) {
   const n = Math.min(men.length, women.length)
@@ -44,7 +44,7 @@ export function totals(lines: Line[]) {
   const subtotal = lines.reduce((a, l) => a + l.unit, 0)
   const gift = lines.filter(l => l.gift).reduce((sum, l) => sum + (l.giftDetails?.packagingPrice ?? site.giftBoxPrice), 0)
   const orderValue = subtotal - discount + gift
-  const shipping = lines.length > 0 ? SHIPPING_FEE : 0
+  const shipping = lines.length > 0 ? calcShipping(subtotal - discount) : 0
   const total = orderValue + shipping
   const customTotal = lines.filter(l => l.custom).reduce((a, l) => a + l.unit, 0)
   const balanceCOD = Math.round(customTotal * (1 - site.advanceRate))

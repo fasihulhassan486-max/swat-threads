@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { totals, SHIPPING_FEE, DELIVERY_TIME, EASYPAISA_NUMBER, EASYPAISA_ACCOUNT_NAME } from '../lib/pricing'
+import { totals, SHIPPING_FEE, FREE_SHIPPING_THRESHOLD, DELIVERY_TIME, EASYPAISA_NUMBER, EASYPAISA_ACCOUNT_NAME } from '../lib/pricing'
 import { createOrder, Customer } from '../lib/woocommerce'
 import { track } from '../lib/analytics'
 import { pkr } from '../lib/format'
@@ -150,7 +150,6 @@ export default function Checkout() {
     { id: 'easypaisa', label: 'EasyPaisa Online Transfer', badge: 'Recommended' },
     { id: 'cod', label: 'Cash on Delivery (COD)' },
     { id: 'card', label: 'Credit / Debit Card' },
-    { id: 'jazzcash', label: 'JazzCash' },
   ]
 
   return (
@@ -386,12 +385,7 @@ export default function Checkout() {
                       </div>
                     )}
 
-                    {/* JAZZCASH DETAILS BOX */}
-                    {isSelected && opt.id === 'jazzcash' && (
-                      <div className="p-4 bg-beige/30 border-t border-beige text-xs text-ink/80 leading-relaxed">
-                        Pay via JazzCash mobile account or voucher at delivery.
-                      </div>
-                    )}
+                    {/* JAZZCASH DETAILS BOX - REMOVED */}
                   </div>
                 )
               })}
@@ -462,7 +456,14 @@ export default function Checkout() {
                   <span className="block font-medium text-ink">Shipping</span>
                   <span className="text-[10px] text-ink/50">{DELIVERY_TIME}</span>
                 </div>
-                <span className="font-semibold text-ink">{pkr(SHIPPING_FEE)}</span>
+                {t.shipping === 0 ? (
+                  <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-xs border border-emerald-200 uppercase tracking-wide font-semibold">Free</span>
+                    (orders above {pkr(FREE_SHIPPING_THRESHOLD)})
+                  </span>
+                ) : (
+                  <span className="font-semibold text-ink">{pkr(SHIPPING_FEE)}</span>
+                )}
               </div>
 
               {/* FINAL TOTAL */}
