@@ -15,8 +15,10 @@ export const Icon = ({ n, className = 'w-5 h-5', fill = false }: { n: string; cl
 export const Swatch = ({ tone, v = 0, className = '' }: { tone: string; v?: number; className?: string }) => (
   <div className={`w-full h-full ${className}`} style={{ background: `repeating-linear-gradient(${45 + v * 30}deg, ${tone} 0 6px, ${tone}dd 6px 7px), ${tone}` }} />)
 export const Media = ({ p, v = 0 }: { p: Product; v?: number }) => {
-  const src = p.images?.[v] || (v === 0 ? p.image : undefined)
-  return src ? <img src={src} alt={p.name} className="w-full h-full object-cover" /> : <Swatch tone={p.tone} v={v} />
+  const item = p.images?.[v]
+  const src = typeof item === 'string' ? item : item?.src || (v === 0 ? p.image : undefined)
+  const alt = (typeof item === 'object' && item?.alt) ? item.alt : p.name || 'Product Image'
+  return src ? <img src={src} alt={alt} className="w-full h-full object-cover" /> : <Swatch tone={p.tone} v={v} />
 }
 export function GiftFields({ gift, note, packing, onChange }: { gift: boolean; note: string; packing: string; onChange: (g: boolean, n: string, pk: string) => void }) {
   return (<div className="space-y-2 text-sm">

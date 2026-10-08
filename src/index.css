@@ -17,3 +17,24 @@
   .eyebrow { @apply text-xs uppercase tracking-[0.25em] text-walnut whitespace-nowrap; }
   .container-x { @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-12; }
 }
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.prose {
+  color: inherit;
+}
+.prose p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.prose ul, .prose ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}

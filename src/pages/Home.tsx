@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { site } from '../config/site'
 import { useStore } from '../context/StoreContext'
 import { Grid, Icon } from '../components/ui'
+import type { Product } from '../types'
 
 // Shows a photo if the file exists in /public/images; otherwise hides itself (no broken-image icon).
 function Img({ src, alt, className }: { src: string; alt: string; className: string }) {
@@ -52,8 +53,77 @@ const mountainTypes = [
 ]
 
 export default function Home() {
-  const { products } = useStore()
+  const { products, featuredProducts: storeFeatured } = useStore()
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(storeFeatured || [])
   const [activeMountain, setActiveMountain] = useState<typeof mountainTypes[0] | null>(null)
+
+  useEffect(() => {
+    if (storeFeatured && storeFeatured.length > 0) {
+      setFeaturedProducts(storeFeatured)
+      return
+    }
+
+    const fetchFeatured = async () => {
+      try {
+        const wpUrl = import.meta.env.VITE_WORDPRESS_URL || site.wc.url
+        if (!wpUrl) return
+
+        const baseUrl = wpUrl.replace(/\/$/, '')
+        const consumerKey = import.meta.env.VITE_WC_CONSUMER_KEY || site.wc.key || ''
+        const consumerSecret = import.meta.env.VITE_WC_CONSUMER_SECRET || site.wc.secret || ''
+
+        // Request WooCommerce API specifically appending featured=true
+        const storeEndpoint = `${baseUrl}/wp-json/wc/store/v1/products?featured=true`
+        const v3Endpoint = `${baseUrl}/wp-json/wc/v3/products?featured=true${consumerKey ? `&consumer_key=${consumerKey}&consumer_secret=${consumerSecret}` : ''}`
+
+        let res = await fetch(storeEndpoint)
+        let data: any = null
+
+        if (res.ok) {
+          data = await res.json()
+        }
+        if ((!Array.isArray(data) || data.length === 0) && consumerKey) {
+          res = await fetch(v3Endpoint)
+          if (res.ok) data = await res.json()
+        }
+
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped: Product[] = data.map((item: any) => ({
+            id: String(item.id),
+            sku: item.sku || `ST-${item.id}`,
+            name: (item.name || '').replace(/<[^>]+>/g, '').trim(),
+            price: parseFloat(item.price || item.regular_price || '0') || 0,
+            originalPrice: item.regular_price && parseFloat(item.regular_price) > parseFloat(item.price || '0') ? parseFloat(item.regular_price) : undefined,
+            category: (item.categories?.[0]?.slug || 'men') as any,
+            badge: item.tags?.[0]?.name || 'Featured',
+            featured: true,
+            description: item.description || item.short_description || '',
+            short_description: item.short_description || '',
+            tone: '#8a8478',
+            stockQuantity: item.is_in_stock !== undefined ? (item.is_in_stock ? 10 : 0) : 1,
+            images: (item.images || []).map((img: any, idx: number) => ({
+              id: img?.id || img?.src || idx,
+              src: typeof img === 'string' ? img : img?.src || '',
+              alt: typeof img === 'object' ? (img?.alt || img?.name || item.name || 'Product Image') : (item.name || 'Product Image'),
+            })),
+          }))
+          setFeaturedProducts(mapped)
+        }
+      } catch (err) {
+        console.warn('Failed to fetch featured products for The Selected Shawls:', err)
+      }
+    }
+
+    fetchFeatured()
+  }, [storeFeatured])
+
+  const featuredShawls = (featuredProducts.length > 0)
+    ? featuredProducts.slice(0, 4)
+    : (storeFeatured && storeFeatured.length > 0)
+      ? storeFeatured.slice(0, 4)
+      : products.filter(p => p.featured || p.badge === 'Featured').length > 0
+        ? products.filter(p => p.featured || p.badge === 'Featured').slice(0, 4)
+        : products.slice(0, 4)
 
   return (
     <>
@@ -115,7 +185,7 @@ export default function Home() {
           </div>
           <Link to="/shop" className="text-ink text-xs sm:text-sm hover:text-brass py-1 shrink-0">View all →</Link>
         </div>
-        <Grid items={products.slice(0, 4)} />
+        <Grid items={featuredShawls} />
       </section>
 
       {/* CATEGORY BANNER GRID */}

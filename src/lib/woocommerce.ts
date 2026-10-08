@@ -5,19 +5,36 @@ import type { totals } from './pricing'
 const base = site.wc.url.replace(/\/$/, '')
 export const wooEnabled = !!base
 const strip = (h: string) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#8217;/g, '’').trim()
-// Reads products through the PUBLIC WooCommerce Store API — no keys needed. Create categories with slugs "men" and "women".
-export async function fetchProducts(): Promise<Product[]> {
-  const res = await fetch(`${base}/wp-json/wc/store/v1/products?per_page=100`)
+// Reads products through the WooCommerce API. Appends featured=true if options.featured is true.
+export async function fetchProducts(options?: { featured?: boolean }): Promise<Product[]> {
+  const query = options?.featured ? '?featured=true' : '?per_page=100'
+  const res = await fetch(`${base}/wp-json/wc/store/v1/products${query}`)
   if (!res.ok) throw new Error('WooCommerce products request failed')
   const data = await res.json()
   return data.map((d: any): Product => {
     const div = 10 ** (d.prices?.currency_minor_unit ?? 0), price = Number(d.prices?.price) / div, reg = Number(d.prices?.regular_price) / div
     const name = strip(d.name)
     const { category, categories } = parseWooCategories(d.categories, name)
-    return { id: String(d.id), sku: d.sku || `ST-${d.id}`, name, price, originalPrice: reg > price ? reg : undefined,
-      category, categories, badge: d.tags?.[0]?.name, description: strip(d.short_description || d.description || ''),
-      tone: '#8a8478', stockQuantity: d.is_in_stock ? 1 : 0, images: (d.images || []).map((i: any) => i.src) }
+    const images = (d.images || []).map((i: any, idx: number) => ({
+      id: i?.id || i?.src || idx,
+      src: typeof i === 'string' ? i : i?.src || '',
+      alt: typeof i === 'object' ? (i?.alt || i?.name || name) : name,
+    })).filter((i: any) => Boolean(i.src))
+    return {
+      id: String(d.id), sku: d.sku || `ST-${d.id}`, name, price, originalPrice: reg > price ? reg : undefined,
+      category, categories, badge: d.tags?.[0]?.name || (d.featured ? 'Featured' : undefined),
+      featured: Boolean(d.featured),
+      description: d.description || d.short_description || '',
+      short_description: d.short_description || '',
+      tone: '#8a8478', stockQuantity: d.is_in_stock ? 1 : 0,
+      image: images[0]?.src || '',
+      images,
+    }
   })
+}
+
+export async function fetchFeaturedProducts(): Promise<Product[]> {
+  return fetchProducts({ featured: true })
 }
 type Customer = { name: string; phone: string; address: string; city: string }
 // Creates the order in WooCommerce. WooCommerce reduces stock automatically, so the piece shows as sold.

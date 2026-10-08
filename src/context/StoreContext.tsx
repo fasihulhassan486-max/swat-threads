@@ -3,7 +3,7 @@ import type { Category, GiftDetails, Line, Product } from '../types'
 import { products as mock } from '../data/products'
 import { track } from '../lib/analytics'
 interface Store {
-  products: Product[]; loading: boolean; lines: Line[]; wishlist: string[]
+  products: Product[]; featuredProducts: Product[]; loading: boolean; lines: Line[]; wishlist: string[]
   inStock: (p: Product) => boolean; inCart: (id: string) => boolean
   addProduct: (p: Product, gift?: boolean, note?: string, packing?: string, giftDetails?: GiftDetails) => void
   addBundle: (m: Product, w: Product, colorNote: string) => void
@@ -140,6 +140,9 @@ export function matchesCategory(product: Product, targetCategory: string | null)
 export function StoreProvider({ children }: { children: ReactNode }) {
   const isWooConfigured = Boolean(import.meta.env.VITE_WORDPRESS_URL)
   const [products, setProducts] = useState<Product[]>(isWooConfigured ? [] : mock)
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(() =>
+    isWooConfigured ? [] : mock.filter(p => p.badge === 'Best seller' || p.badge === 'Heritage')
+  )
   const [loading, setLoading] = useState(isWooConfigured)
   const [lines, setLines] = useState<Line[]>(() => load('st-lines', []))
   const [wishlist, setWish] = useState<string[]>(() => load('st-wish', []))
@@ -158,6 +161,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const consumerSecret = import.meta.env.VITE_WC_CONSUMER_SECRET || ''
     const v3Endpoint = `${baseUrl}/wp-json/wc/v3/products?per_page=100&consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`
 
+    // Featured endpoints with featured=true
+    const storeFeaturedEndpoint = `${baseUrl}/wp-json/wc/store/v1/products?featured=true`
+    const v3FeaturedEndpoint = `${baseUrl}/wp-json/wc/v3/products?featured=true&consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`
+
     const mapItem = (item: any, isV3 = false): Product => {
       const div = isV3 ? 1 : 10 ** (item.prices?.currency_minor_unit ?? 0)
       const price = isV3
@@ -168,10 +175,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         : (item.prices?.regular_price ? Number(item.prices.regular_price) / div : (item.regular_price ? parseFloat(item.regular_price) : 0))
       const originalPrice = regularPrice > price ? regularPrice : undefined
 
-      const allImages: string[] = (item.images || [])
-        .map((img: any) => (typeof img === 'string' ? img : img?.src || img?.src))
-        .filter(Boolean)
-      const firstImage = allImages[0] || ''
+      const rawImages = Array.isArray(item.images) ? item.images : []
+      const allImages = rawImages
+        .map((img: any, idx: number) => {
+          if (typeof img === 'string') {
+            return { id: idx, src: img, alt: stripHtml(item.name || '') || 'Product Image' }
+          }
+          return {
+            id: img?.id || img?.src || idx,
+            src: img?.src || '',
+            alt: img?.alt || img?.name || stripHtml(item.name || '') || 'Product Image',
+          }
+        })
+        .filter((img: any) => Boolean(img.src))
+
+      const firstImage = allImages[0]?.src || (typeof item.image === 'string' ? item.image : item.image?.src || '')
 
       const name = stripHtml(item.name || '')
       const { category, categories } = parseWooCategories(item.categories, name)
@@ -189,11 +207,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         category,
         categories,
         badge: item.tags?.[0]?.name || (item.featured ? 'Featured' : undefined),
-        description: stripHtml(item.short_description || item.description || ''),
+        featured: Boolean(item.featured),
+        description: item.description || item.short_description || '',
+        short_description: item.short_description || '',
         tone: '#8a8478',
         stockQuantity,
         image: firstImage,
-        images: allImages.length > 0 ? allImages : (firstImage ? [firstImage] : []),
+        images: allImages.length > 0 ? allImages : (firstImage ? [{ id: 0, src: firstImage, alt: name }] : []),
       }
     }
 
@@ -242,6 +262,49 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
         const mappedProducts: Product[] = rawData.map(item => mapItem(item, usedFallback))
         setProducts(mappedProducts)
+
+        // ── Featured Products: Fetch with featured=true ──────────────────
+        let rawFeatured: any[] = []
+        let featuredFallback = false
+
+        try {
+          const res = await fetch(storeFeaturedEndpoint)
+          if (res.ok) {
+            const json = await res.json()
+            if (Array.isArray(json) && json.length > 0) {
+              rawFeatured = json
+            } else {
+              featuredFallback = true
+            }
+          } else {
+            featuredFallback = true
+          }
+        } catch {
+          featuredFallback = true
+        }
+
+        if (featuredFallback && consumerKey) {
+          try {
+            const res = await fetch(v3FeaturedEndpoint)
+            if (res.ok) {
+              const json = await res.json()
+              if (Array.isArray(json)) {
+                rawFeatured = json
+              }
+            }
+          } catch (v3FeaturedErr) {
+            console.warn('[StoreContext] v3 featured fetch error:', v3FeaturedErr)
+          }
+        }
+
+        if (rawFeatured.length > 0) {
+          const mappedFeatured: Product[] = rawFeatured.map(item => mapItem(item, featuredFallback))
+          setFeaturedProducts(mappedFeatured)
+        } else {
+          // Fallback if no featured products returned
+          const localFeatured = mappedProducts.filter(p => p.featured || p.badge === 'Featured')
+          setFeaturedProducts(localFeatured)
+        }
       } finally {
         setLoading(false)
       }
@@ -254,7 +317,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const inCart = (id: string) => lines.some(l => l.productId === id)
   const mk = (p: Product, gift = false, note = '', packing = '', colorNote = '', giftDetails?: GiftDetails): Line => ({ id: p.id, productId: p.id, category: p.category, name: p.name, unit: p.price, gift, note, packing, colorNote, giftDetails })
   const value: Store = {
-    products, loading, lines, wishlist, inStock, inCart,
+    products, featuredProducts, loading, lines, wishlist, inStock, inCart,
     addProduct: (p, gift, note, packing, giftDetails) => {
       if (!inStock(p)) return
       setLines(ls => {

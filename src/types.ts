@@ -1,5 +1,27 @@
 export type Category = 'men' | 'women' | 'couple-bundle' | 'gifting' | string
-export interface Product { id: string; sku: string; name: string; price: number; originalPrice?: number; category: Category; categories?: string[]; badge?: string; description: string; tone: string; stockQuantity: number; images: string[]; image?: string }
+export interface ProductImage {
+  id?: number | string
+  src: string
+  alt?: string
+  name?: string
+}
+export interface Product {
+  id: string
+  sku: string
+  name: string
+  price: number
+  originalPrice?: number
+  category: Category
+  categories?: string[]
+  badge?: string
+  featured?: boolean
+  description: string
+  short_description?: string
+  tone: string
+  stockQuantity: number
+  images: (ProductImage | string)[]
+  image?: string
+}
 export interface CustomSpec {
   baseId: string
   color: string
