@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { Media, Icon } from '../components/ui'
-import { customPrice } from '../lib/pricing'
+import { customPrice, WOMEN_EMBROIDERY_PRICE } from '../lib/pricing'
 import { pkr } from '../lib/format'
 import { site } from '../config/site'
 import type { Product, CustomSpec } from '../types'
@@ -198,7 +198,7 @@ export default function Customize() {
     }
     // Couple bundle: use base bundle price plus any design add-ons
     const menExtra = coupleMensDesign === 'Border' ? 1000 : 0
-    const womenExtra = coupleWomensDesign === 'Embroidered' ? 2500 : 0
+    const womenExtra = coupleWomensDesign === 'Embroidered' ? WOMEN_EMBROIDERY_PRICE : 0
     return base.price + menExtra + womenExtra
   }, [base, context, mensSize, mensStyle, womensStyle, coupleMensDesign, coupleWomensDesign])
 
@@ -276,6 +276,7 @@ export default function Customize() {
         fabric: womensFabric,
         customColor: womensColor === 'Custom' ? womensCustomColor.trim() : undefined,
         style: womensStyle,
+        styleFinish: womensStyle,
         specialInstructions: womensInstructions.trim(),
         referenceImage: refString,
       }
@@ -718,7 +719,7 @@ export default function Customize() {
                         >
                           <span>{s}</span>
                           {s === 'Handwoven Border' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
-                          {s === 'Embroidered' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 2,500</span>}
+                          {s === 'Embroidered' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
                           {s === 'Custom' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,500</span>}
                         </button>
                       )
@@ -944,7 +945,7 @@ export default function Customize() {
                             coupleWomensDesign === d ? 'border-walnut bg-walnut text-white' : 'border-beige bg-white text-ink'
                           }`}
                         >
-                          {d} {d === 'Embroidered' && '(+PKR 2,500)'}
+                          {d} {d === 'Embroidered' && '(+PKR 1,000)'}
                         </button>
                       ))}
                     </div>

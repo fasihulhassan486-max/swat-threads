@@ -6,7 +6,7 @@ import { pkr } from '../lib/format'
 const pages: Record<string, [string, string[]]> = {
   '/our-story': ['Our Story', ['Swat Threads brings handwoven wool shawls from the valleys of Swat to your wardrobe. Each shawl is sourced directly from local artisans, hand-selected, and quality checked.', 'We keep our collection small on purpose — most pieces are one of one.']],
   '/contact': ['Contact', ['Reach us on WhatsApp, email or social media for orders, custom requests, and questions.']],
-  '/shipping': ['Shipping Policy', ['We deliver nationwide across Pakistan. Ready pieces ship within 1–3 working days; custom orders take 8–10 days.']],
+  '/shipping': ['Shipping Policy', ['We deliver nationwide across Pakistan. Standard delivery time is 3 to 4 Working Days for ready pieces; custom orders are prepared within 8–10 days.', 'Shipping charge is PKR 250 nationwide. Cash on Delivery (COD) and EasyPaisa online transfer are accepted.']],
   '/returns': ['Returns & Refunds', ['Contact us within 7 days of delivery if there is a problem with your piece. Custom orders are made to your specification and are non-refundable except for defects.']],
   '/privacy': ['Privacy Policy', ['We only collect the details needed to deliver your order and never sell your data.', 'We use the Meta Pixel (Facebook and Instagram) to measure our advertising and show relevant ads to people who visited the site.']],
   '/terms': ['Terms', ['By ordering you agree that each piece is single-inventory and available while stock lasts.']],
@@ -39,21 +39,143 @@ export default function Info() {
 }
 
 export const Confirmation = () => {
-  const { state } = useLocation() as { state?: { dueNow: number; bal: number } }
+  const { state } = useLocation() as {
+    state?: {
+      orderId?: string | number
+      total?: number
+      dueNow?: number
+      bal?: number
+      method?: string
+      customer?: {
+        name?: string
+        phone?: string
+        email?: string
+        address?: string
+        city?: string
+      }
+      lines?: any[]
+      shipping?: number
+      estimatedDelivery?: string
+    }
+  }
+
+  const orderNum = state?.orderId ? `#VR-${state.orderId}` : '#VR-REC'
+  const estDelivery = state?.estimatedDelivery || '3 to 4 Working Days'
+
+  let paymentLabel = 'Cash on Delivery'
+  if (state?.method === 'easypaisa') paymentLabel = 'EasyPaisa Online Transfer'
+  else if (state?.method === 'card') paymentLabel = 'Credit / Debit Card'
+  else if (state?.method === 'jazzcash') paymentLabel = 'JazzCash'
+
+  const whatsappMsg = `Assalam o Alaikum! I just placed order ${orderNum} on Viras store. Could you please confirm the status?`
+
   return (
-    <div className="container-x max-w-xl py-12 sm:py-20 text-center">
-      <h1 className="text-3xl sm:text-4xl text-ink mb-4">Thank you</h1>
-      <p className="text-ink/70 mb-4 text-sm sm:text-base leading-relaxed">
-        Your order is placed. We will follow up on WhatsApp shortly to confirm details and delivery.
+    <div className="container-x max-w-2xl py-12 sm:py-20 text-center">
+      {/* SUCCESS CREST */}
+      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 rounded-full bg-emerald-50 border-2 border-emerald-500/30 flex items-center justify-center text-emerald-700 shadow-sm">
+        <svg viewBox="0 0 24 24" className="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+
+      <p className="eyebrow !text-brass mb-2">Order Confirmed</p>
+      <h1 className="text-3xl sm:text-4xl text-ink font-serif mb-3">Thank You for Choosing VIRAS</h1>
+      
+      <p className="text-ink/80 text-sm sm:text-base leading-relaxed max-w-lg mx-auto mb-3">
+        Your order has been received successfully. We truly appreciate your trust in VIRAS.
       </p>
-      {state && (
-        <p className="text-xs sm:text-sm text-walnut font-medium">
-          Paid now: {pkr(state.dueNow)}{state.bal > 0 && ` · Due on delivery: ${pkr(state.bal)}`}
-        </p>
-      )}
-      <Link to="/shop" className="btn-outline mt-6 inline-block">
-        Continue shopping
-      </Link>
+
+      <p className="text-ink/70 text-xs sm:text-sm leading-relaxed max-w-md mx-auto mb-6 font-sans">
+        Your shawl is now being prepared with care. Our team will contact you on your provided phone number if any confirmation is required.
+      </p>
+
+      {/* ESTIMATED DELIVERY BADGE */}
+      <div className="inline-flex items-center gap-2 bg-beige/60 border border-brass/40 px-4 py-2 rounded-full text-xs font-medium text-ink mb-8">
+        <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block animate-pulse" />
+        <span>Estimated Delivery: <strong>{estDelivery}</strong></span>
+      </div>
+
+      {/* ORDER DETAILS RECEIPT CARD */}
+      <div className="bg-white border border-beige p-6 sm:p-8 text-left shadow-xs mb-8 space-y-4">
+        <div className="flex justify-between items-center border-b border-beige pb-3">
+          <div>
+            <span className="text-[10px] uppercase tracking-widest text-ink/50 block font-mono">Order Number</span>
+            <span className="text-lg font-serif font-bold text-ink">{orderNum}</span>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] uppercase tracking-widest text-ink/50 block font-mono">Order Total</span>
+            <span className="text-lg font-serif font-bold text-walnut">{pkr(state?.total ?? state?.dueNow ?? 0)}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-ink/50 block mb-0.5">Payment Method</span>
+            <span className="font-medium text-ink block">{paymentLabel}</span>
+            {state?.method === 'easypaisa' && (
+              <span className="text-[11px] text-emerald-800 font-mono block mt-0.5">
+                EasyPaisa: 0329 6424489 (Fasih Ul Hassan)
+              </span>
+            )}
+          </div>
+
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-ink/50 block mb-0.5">Estimated Delivery</span>
+            <span className="font-medium text-ink">{estDelivery}</span>
+          </div>
+
+          {state?.customer?.phone && (
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-ink/50 block mb-0.5">Customer Phone</span>
+              <span className="font-medium text-ink font-mono">{state.customer.phone}</span>
+            </div>
+          )}
+
+          {state?.customer?.email && (
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-ink/50 block mb-0.5">Customer Email</span>
+              <span className="font-medium text-ink truncate block">{state.customer.email}</span>
+            </div>
+          )}
+
+          {state?.customer?.address && (
+            <div className="sm:col-span-2">
+              <span className="text-[10px] uppercase tracking-wider text-ink/50 block mb-0.5">Delivery Address</span>
+              <span className="text-ink/80 block leading-relaxed">
+                {state.customer.address}{state.customer.city ? `, ${state.customer.city}` : ''}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* CUSTOM ORDER BREAKDOWN IF APPLICABLE */}
+        {state?.bal && state.bal > 0 ? (
+          <div className="border-t border-beige pt-3 text-xs flex justify-between items-center text-ink/75">
+            <span>Advance Deposit: <strong>{pkr(state.dueNow || 0)}</strong></span>
+            <span>Due on Delivery (COD): <strong>{pkr(state.bal)}</strong></span>
+          </div>
+        ) : null}
+      </div>
+
+      {/* ACTIONS */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+        <Link to="/shop" className="btn-primary w-full sm:w-auto px-8 py-3.5 text-xs tracking-[0.18em]">
+          Continue Shopping
+        </Link>
+        <a
+          href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(whatsappMsg)}`}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-outline w-full sm:w-auto px-8 py-3.5 text-xs tracking-[0.18em] flex items-center justify-center gap-2"
+        >
+          <span>Chat on WhatsApp</span>
+          <span className="text-brass">→</span>
+        </a>
+      </div>
+
+      <p className="text-[11px] text-ink/50 mt-8 font-sans">
+        VIRAS · Swat Valley, Khyber Pakhtunkhwa, Pakistan · Heirloom Handwoven Shawls
+      </p>
     </div>
   )
 }

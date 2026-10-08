@@ -5,6 +5,7 @@ import { Icon, Media } from '../components/ui'
 import { pkr } from '../lib/format'
 import { track } from '../lib/analytics'
 import { site } from '../config/site'
+import { DELIVERY_TIME, SHIPPING_FEE } from '../lib/pricing'
 import type { Product, ProductImage } from '../types'
 
 export function ProductDetail({ product: propProduct }: { product?: Product } = {}) {
@@ -150,8 +151,13 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
             dangerouslySetInnerHTML={{ __html: product.short_description || '' }}
           />
 
-          <p className={`text-xs sm:text-sm mb-6 ${ok ? 'text-emerald-700 font-medium' : 'text-ink/60'}`}>
+          <p className={`text-xs sm:text-sm mb-2 ${ok ? 'text-emerald-700 font-medium' : 'text-ink/60'}`}>
             {ok ? '● In stock — only one piece available' : '○ Sold — one of one'}
+          </p>
+
+          <p className="text-xs text-ink/75 flex items-center gap-1.5 mb-5 font-sans">
+            <Icon n="truck" className="w-3.5 h-3.5 text-brass shrink-0" />
+            <span>Standard Delivery: <strong>{DELIVERY_TIME}</strong> · Shipping {pkr(SHIPPING_FEE)}</span>
           </p>
 
           <div className="flex gap-3">

@@ -36,26 +36,44 @@ export async function fetchProducts(options?: { featured?: boolean }): Promise<P
 export async function fetchFeaturedProducts(): Promise<Product[]> {
   return fetchProducts({ featured: true })
 }
-type Customer = { name: string; phone: string; address: string; city: string }
+export type Customer = {
+  name: string
+  phone: string
+  email: string
+  address: string
+  city: string
+  deliveryInstructions?: string
+}
+
 // Creates the order in WooCommerce. WooCommerce reduces stock automatically, so the piece shows as sold.
 // SECURITY: wc/v3 needs API keys. For production point VITE_ORDER_PROXY_URL at a tiny server/function that adds the keys.
 export async function createOrder(lines: Line[], c: Customer, method: string, t: ReturnType<typeof totals>) {
   if (!wooEnabled) return null
   const [first, ...rest] = c.name.trim().split(' ')
-  const addr = { first_name: first, last_name: rest.join(' '), address_1: c.address, city: c.city, country: 'PK', phone: c.phone }
+  const addr = {
+    first_name: first,
+    last_name: rest.join(' ') || first,
+    address_1: c.address,
+    city: c.city,
+    country: 'PK',
+    phone: c.phone,
+    email: c.email,
+  }
   const meta = (o: Record<string, string | undefined>) => Object.entries(o).filter(([, v]) => v).map(([key, value]) => ({ key, value }))
   const fee = (name: string, total: number, m: Record<string, string | undefined> = {}) => ({ name, total: String(total), tax_status: 'none', meta_data: meta(m) })
   const fees = [
     ...lines.filter(l => l.custom).map(l => {
       const c = l.custom!
+      const isEmbroidery = c.style === 'Embroidered' || c.pattern === 'Embroidered' || c.womensDesign === 'Embroidered' || c.styleFinish === 'Embroidered'
       return fee(l.name, l.unit, {
-        'Customization Type': c.customizationType,
+        'Customization Type': c.customizationType === 'women' ? "Women's Shawl Customization" : c.customizationType === 'men' ? "Men's Shawl Customization" : "Couple Bundle Customization",
+        Fabric: c.fabric || c.womensFabric,
         Color: c.customColor ? `Custom: ${c.customColor}` : c.color,
         'Custom Color': c.customColor,
         Size: c.customDimensions ? `Custom Dimensions: ${c.customDimensions}` : c.size,
         'Custom Dimensions': c.customDimensions,
         'Style / Finish': c.styleFinish || c.style || c.pattern,
-        Fabric: c.fabric,
+        'Embroidery Option': isEmbroidery ? 'Hand Embroidery Selected (+PKR 1,000)' : 'None',
         'Special Instructions': c.specialInstructions || c.notes,
         'Reference Image': c.referenceImage,
         "Men's Color": c.mensCustomColor ? `Custom: ${c.mensCustomColor}` : c.mensColor,
@@ -71,9 +89,38 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
     ...lines.filter(l => l.gift).map(l => fee(l.giftDetails?.packaging || 'Heirloom gift box', l.giftDetails?.packagingPrice ?? site.giftBoxPrice, { 'Recipient': l.giftDetails?.recipientName, 'Sender': l.giftDetails?.senderName, 'Gift message': l.giftDetails?.message || l.note, 'Packaging': l.giftDetails?.packaging || l.packing, 'Occasion': l.giftDetails?.occasion, For: l.name })),
     ...(t.discount > 0 ? [fee('Couple bundle discount (10%)', -t.discount)] : []),
   ]
+
+  let paymentMethodTitle = method.toUpperCase()
+  if (method === 'easypaisa') {
+    paymentMethodTitle = 'EasyPaisa (0329 6424489 - Fasih Ul Hassan)'
+  } else if (method === 'cod') {
+    paymentMethodTitle = 'Cash on Delivery (COD)'
+  } else if (method === 'card') {
+    paymentMethodTitle = 'Credit / Debit Card'
+  } else if (method === 'jazzcash') {
+    paymentMethodTitle = 'JazzCash'
+  }
+
+  const shippingLines = t.shipping > 0 ? [
+    {
+      method_id: 'flat_rate',
+      method_title: 'Standard Delivery (3 to 4 Working Days)',
+      total: String(t.shipping),
+    }
+  ] : []
+
+  const notesList = [
+    t.hasCustom ? `Custom order. Advance due now: PKR ${t.dueNow}. Balance on delivery: PKR ${t.balanceCOD}.` : '',
+    c.deliveryInstructions ? `Delivery Instructions: ${c.deliveryInstructions}` : '',
+    method === 'easypaisa' ? 'Payment via EasyPaisa (0329 6424489 - Fasih Ul Hassan)' : '',
+  ].filter(Boolean).join(' | ')
+
   const body = {
-    payment_method: site.wc.paymentIds[method] ?? method, payment_method_title: method.toUpperCase(), set_paid: false,
-    billing: addr, shipping: addr,
+    payment_method: site.wc.paymentIds[method] ?? method,
+    payment_method_title: paymentMethodTitle,
+    set_paid: false,
+    billing: addr,
+    shipping: addr,
     line_items: lines.filter(l => l.productId).map(l => ({
       product_id: Number(l.productId),
       quantity: 1,
@@ -89,8 +136,15 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
       }),
     })),
     fee_lines: fees,
-    customer_note: t.hasCustom ? `Custom order. Advance due now: PKR ${t.dueNow}. Balance on delivery: PKR ${t.balanceCOD}.` : '',
-    meta_data: meta({ advance_due_now: String(t.dueNow), cod_balance: String(t.balanceCOD) }),
+    shipping_lines: shippingLines,
+    customer_note: notesList,
+    meta_data: meta({
+      advance_due_now: String(t.dueNow),
+      cod_balance: String(t.balanceCOD),
+      delivery_instructions: c.deliveryInstructions,
+      estimated_delivery: '3 to 4 Working Days',
+      easypaisa_account: method === 'easypaisa' ? '0329 6424489 (Fasih Ul Hassan)' : undefined,
+    }),
   }
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   let url = site.wc.orderProxy

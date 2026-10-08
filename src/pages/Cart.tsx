@@ -1,15 +1,12 @@
 import { Link } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { totals, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '../lib/pricing'
+import { totals } from '../lib/pricing'
 import { pkr } from '../lib/format'
 import { GiftFields, Media } from '../components/ui'
 
 export function Summary() {
   const { lines } = useStore()
   const t = totals(lines)
-  const orderValue = t.subtotal - t.discount + t.gift
-  const remaining = FREE_SHIPPING_THRESHOLD - orderValue
-  const freeShipping = t.shipping === 0
 
   const Row = ({ l, v, b = false, green = false }: { l: string; v: React.ReactNode; b?: boolean; green?: boolean }) => (
     <div className={`flex justify-between items-center ${b ? 'font-serif text-base sm:text-lg border-t border-beige/80 pt-3 mt-1' : ''}`}>
@@ -26,30 +23,9 @@ export function Summary() {
 
       {/* SHIPPING ROW */}
       <Row
-        l="Shipping"
-        v={
-          freeShipping
-            ? <span className="bg-emerald-100 text-emerald-700 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-sm font-bold">FREE</span>
-            : pkr(SHIPPING_FEE)
-        }
-        green={freeShipping}
+        l="Shipping (3 to 4 Working Days)"
+        v={pkr(t.shipping)}
       />
-
-      {/* PROGRESS BAR — only if not yet free */}
-      {lines.length > 0 && !freeShipping && remaining > 0 && (
-        <div className="pt-1">
-          <div className="flex justify-between text-[11px] text-ink/60 mb-1.5">
-            <span>Add {pkr(remaining)} more for Free Shipping</span>
-            <span>{Math.round((orderValue / FREE_SHIPPING_THRESHOLD) * 100)}%</span>
-          </div>
-          <div className="h-1.5 bg-beige/80 border border-beige/60 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-walnut rounded-full transition-all duration-500"
-              style={{ width: `${Math.min((orderValue / FREE_SHIPPING_THRESHOLD) * 100, 100)}%` }}
-            />
-          </div>
-        </div>
-      )}
 
       <Row l="Total" v={pkr(t.total)} b />
       {t.hasCustom && (

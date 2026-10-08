@@ -38,17 +38,14 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
-      {/* ─── ANNOUNCEMENT BAR: FREE SHIPPING ─── */}
+      {/* ─── ANNOUNCEMENT BAR: STANDARD DELIVERY ─── */}
       <div className="bg-[#1C1F1D] text-white/90 text-[12px] py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans overflow-hidden">
         <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a1.5 1.5 0 1 0 0-3M17 19a1.5 1.5 0 1 0 0-3" />
         </svg>
         <span className="leading-none text-center whitespace-nowrap truncate">
-          <span className="text-brass font-semibold">Free Shipping</span>
-          <span className="hidden sm:inline"> · Complimentary Express Shipping</span>
-          {' '}on orders above{' '}
-          <span className="text-brass font-semibold">PKR 5,000</span>
-          <span className="hidden sm:inline"> across Pakistan</span>
+          <span className="text-brass font-semibold">Standard Delivery</span>
+          <span> · 3 to 4 Working Days across Pakistan · Shipping PKR 250</span>
         </span>
       </div>
 
