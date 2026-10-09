@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { matchesCategory } from '../context/StoreContext'
@@ -11,108 +11,11 @@ import type { Product } from '../types'
 const FREE_GIFTS_VALUE = 1800
 
 export default function Couple() {
-  const { products, loading: ctxLoading, inStock, inCart, addProduct } = useStore()
+  const { products, loading: isLoading, inStock, inCart, addProduct } = useStore()
   const navigate = useNavigate()
   const [added, setAdded] = useState<string>('')
 
-  // ── Derive couple-bundle products from context (already fetched by StoreContext) ──
-  const ctxBundles = products.filter(p => matchesCategory(p, 'couple-bundle') && inStock(p))
-
-  // ── Direct API fetch if StoreContext hasn't loaded couple-bundle products yet ──
-  const [apiBundles, setApiBundles] = useState<Product[]>([])
-  const [apiLoading, setApiLoading] = useState(false)
-  const [apiFetched, setApiFetched] = useState(false)
-
-  useEffect(() => {
-    // Only fire API fetch if context is done loading and has no couple-bundle products
-    if (ctxLoading || ctxBundles.length > 0 || apiFetched) return
-
-    const fetchCoupleBundles = async () => {
-      setApiLoading(true)
-      setApiFetched(true)
-      try {
-        const wpUrl = import.meta.env.VITE_WORDPRESS_URL || site.wc.url
-        if (!wpUrl) return
-        const baseUrl = wpUrl.replace(/\/$/, '')
-        const consumerKey = import.meta.env.VITE_WC_CONSUMER_KEY || site.wc.key || ''
-        const consumerSecret = import.meta.env.VITE_WC_CONSUMER_SECRET || site.wc.secret || ''
-
-        // Try Store API first (no auth needed), then v3 fallback
-        const storeUrl = `${baseUrl}/wp-json/wc/store/v1/products?category=couple-bundle&per_page=50`
-        const v3Url = `${baseUrl}/wp-json/wc/v3/products?category=couple-bundle&per_page=50&consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`
-
-        let data: any[] | null = null
-
-        try {
-          const res = await fetch(storeUrl)
-          if (res.ok) {
-            const json = await res.json()
-            if (Array.isArray(json) && json.length > 0) data = json
-          }
-        } catch { /* fall through to v3 */ }
-
-        if (!data && consumerKey) {
-          try {
-            const res = await fetch(v3Url)
-            if (res.ok) {
-              const json = await res.json()
-              if (Array.isArray(json)) data = json
-            }
-          } catch { /* ignore */ }
-        }
-
-        if (data && data.length > 0) {
-          const mapped: Product[] = data.map((item: any) => {
-            const div = 10 ** (item.prices?.currency_minor_unit ?? 0)
-            const price = item.prices?.price
-              ? Number(item.prices.price) / div
-              : parseFloat(item.price || item.regular_price || '0') || 0
-            const reg = item.prices?.regular_price
-              ? Number(item.prices.regular_price) / div
-              : parseFloat(item.regular_price || '0') || 0
-
-            const rawImages = Array.isArray(item.images) ? item.images : []
-            const images = rawImages
-              .map((img: any, idx: number) => ({
-                id: img?.id || img?.src || idx,
-                src: typeof img === 'string' ? img : img?.src || '',
-                alt: typeof img === 'object' ? (img?.alt || img?.name || item.name || 'Bundle Image') : (item.name || 'Bundle Image'),
-              }))
-              .filter((i: any) => Boolean(i.src))
-
-            return {
-              id: String(item.id),
-              sku: item.sku || `ST-${item.id}`,
-              name: (item.name || '').replace(/<[^>]+>/g, '').trim(),
-              price,
-              originalPrice: reg > price ? reg : undefined,
-              category: 'couple-bundle' as const,
-              badge: item.tags?.[0]?.name || undefined,
-              featured: Boolean(item.featured),
-              description: item.description || item.short_description || '',
-              short_description: item.short_description || '',
-              tone: '#8a8478',
-              stockQuantity: item.is_in_stock !== undefined ? (item.is_in_stock ? 10 : 0) : (item.stock_status === 'outofstock' ? 0 : 1),
-              image: images[0]?.src || '',
-              images,
-            }
-          }).filter(p => p.stockQuantity > 0)
-
-          setApiBundles(mapped)
-        }
-      } catch (err) {
-        console.warn('[Couple] Failed to fetch couple-bundle products:', err)
-      } finally {
-        setApiLoading(false)
-      }
-    }
-
-    fetchCoupleBundles()
-  }, [ctxLoading, ctxBundles.length, apiFetched])
-
-  // Final bundle list: prefer context (already normalized), fall back to direct API fetch
-  const bundleProducts = ctxBundles.length > 0 ? ctxBundles : apiBundles
-  const isLoading = ctxLoading || apiLoading
+  const bundleProducts = products.filter(p => matchesCategory(p, 'couple-bundle') && inStock(p))
 
   const handleAdd = (p: Product) => {
     addProduct(p, false, '', 'Couple Bundle — includes Swati Cap & Pakol (Free)')

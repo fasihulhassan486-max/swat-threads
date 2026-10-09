@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { totals, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '../lib/pricing'
+import { totals, SHIPPING_FEE, DELIVERY_TIME } from '../lib/pricing'
+import { site } from '../config/site'
 import { pkr } from '../lib/format'
 import { GiftFields, Media } from '../components/ui'
 
@@ -23,15 +24,8 @@ export function Summary() {
 
       {/* SHIPPING ROW */}
       <div className="flex justify-between items-center">
-        <span>Shipping (3 to 4 Working Days)</span>
-        {t.shipping === 0 ? (
-          <span className="text-emerald-700 font-medium">Free 🎉</span>
-        ) : (
-          <span>
-            {pkr(SHIPPING_FEE)}
-            <span className="block text-[10px] text-ink/50">Free above {pkr(FREE_SHIPPING_THRESHOLD)}</span>
-          </span>
-        )}
+        <span>Estimated delivery: {DELIVERY_TIME}</span>
+        <span>{pkr(SHIPPING_FEE)}</span>
       </div>
 
       <Row l="Total" v={pkr(t.total)} b />
@@ -109,7 +103,7 @@ export default function Cart() {
                       <div className="mt-2 bg-beige/60 border border-brass/30 p-2.5 text-xs space-y-1">
                         <p className="font-serif font-medium text-ink flex items-center justify-between">
                           <span>🎁 {l.giftDetails.packaging}</span>
-                          <span className="font-sans">+{pkr(l.giftDetails.packagingPrice ?? 390)}</span>
+                          <span className="font-sans">+{pkr(l.giftDetails.packagingPrice ?? site.giftBoxPrice)}</span>
                         </p>
                         {l.giftDetails.recipientName && (
                           <p className="text-ink/80"><span className="text-ink/60">For:</span> {l.giftDetails.recipientName}</p>

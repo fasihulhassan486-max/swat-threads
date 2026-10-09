@@ -4,9 +4,9 @@ import { site } from '../config/site'
 import { pkr } from '../lib/format'
 
 const pages: Record<string, [string, string[]]> = {
-  '/our-story': ['Our Story', ['Swat Threads brings handwoven wool shawls from the valleys of Swat to your wardrobe. Each shawl is sourced directly from local artisans, hand-selected, and quality checked.', 'We keep our collection small on purpose — most pieces are one of one.']],
-  '/contact': ['Contact', ['Reach us on WhatsApp, email or social media for orders, custom requests, and questions.']],
-  '/shipping': ['Shipping Policy', ['We deliver nationwide across Pakistan. Standard delivery time is 3 to 4 Working Days for ready pieces; custom orders are prepared within 8–10 days.', 'Shipping charge is PKR 250 nationwide. Cash on Delivery (COD) and EasyPaisa online transfer are accepted.']],
+  '/our-story': ['Our Story', ['Viras brings premium wool shawls from the valleys of Swat, Pakistan, to modern wardrobes. Each piece is sourced from local weavers, selected by hand, and checked before it is packed.', 'We keep the collection small on purpose — most pieces are one of one, made to be worn and kept.']],
+  '/contact': ['Contact', ['Reach us on WhatsApp, email, or social media for orders, custom shawls, and questions about Swati wool shawls.']],
+  '/shipping': ['Shipping Policy', ['We deliver nationwide across Pakistan. Estimated delivery is 3 to 4 working days. Custom orders are prepared before dispatch and follow the same delivery estimate.', 'The standard delivery charge is PKR 250 per order. Cash on Delivery and EasyPaisa transfers are accepted. We do not promise weekend or public-holiday delivery.']],
   '/returns': ['Returns & Refunds', ['Contact us within 7 days of delivery if there is a problem with your piece. Custom orders are made to your specification and are non-refundable except for defects.']],
   '/privacy': ['Privacy Policy', ['We only collect the details needed to deliver your order and never sell your data.', 'We use the Meta Pixel (Facebook and Instagram) to measure our advertising and show relevant ads to people who visited the site.']],
   '/terms': ['Terms', ['By ordering you agree that each piece is single-inventory and available while stock lasts.']],
@@ -60,12 +60,11 @@ export const Confirmation = () => {
   }
 
   const orderNum = state?.orderId ? `#VR-${state.orderId}` : '#VR-REC'
-  const estDelivery = state?.estimatedDelivery || '3 to 4 Working Days'
+  const estDelivery = state?.estimatedDelivery || '3 to 4 working days'
 
   let paymentLabel = 'Cash on Delivery'
-  if (state?.method === 'easypaisa') paymentLabel = 'EasyPaisa Online Transfer'
+  if (state?.method === 'easypaisa') paymentLabel = 'EasyPaisa'
   else if (state?.method === 'card') paymentLabel = 'Credit / Debit Card'
-  else if (state?.method === 'jazzcash') paymentLabel = 'JazzCash'
 
   const whatsappMsg = `Assalam o Alaikum! I just placed order ${orderNum} on Viras store. Could you please confirm the status?`
 
@@ -114,7 +113,7 @@ export const Confirmation = () => {
             <span className="font-medium text-ink block">{paymentLabel}</span>
             {state?.method === 'easypaisa' && (
               <span className="text-[11px] text-emerald-800 font-mono block mt-0.5">
-                EasyPaisa: 0329 6424489 (Fasih Ul Hassan)
+                Account number: 0309 6424489 · Account title: Fasih Ul Hassan
               </span>
             )}
           </div>

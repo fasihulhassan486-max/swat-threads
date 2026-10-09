@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { pkr } from '../lib/format'
+import { site } from '../config/site'
+import { DELIVERY_TIME } from '../lib/pricing'
 import { Icon, Media } from '../components/ui'
 import type { GiftDetails } from '../types'
 
@@ -52,7 +54,7 @@ export default function Gifting() {
   }, [products, selectedId])
 
   // Fixed Packaging Price & Total
-  const PACKAGING_PRICE = 390
+  const PACKAGING_PRICE = site.giftBoxPrice
   const productPrice = selectedProduct ? selectedProduct.price : 0
   const totalPrice = selectedProduct ? productPrice + PACKAGING_PRICE : PACKAGING_PRICE
 
@@ -77,13 +79,13 @@ export default function Gifting() {
       recipientName: trimmedRecipient,
       senderName: senderName.trim(),
       message: trimmedMessage,
-      packaging: 'Signature Gift Packaging, Satin Ribbon & Handwritten Card — PKR 390',
-      packagingPrice: 390,
+      packaging: `${site.giftPackagingLabel} — PKR ${PACKAGING_PRICE}`,
+      packagingPrice: PACKAGING_PRICE,
       occasion: occasion.trim(),
     }
 
     const packingSummary = [
-      'Packaging: Signature Gift Packaging, Satin Ribbon & Handwritten Card — PKR 390',
+      `Packaging: ${site.giftPackagingLabel} — PKR ${PACKAGING_PRICE}`,
       trimmedRecipient && `To: ${trimmedRecipient}`,
       senderName.trim() && `From: ${senderName.trim()}`,
       occasion && `Occasion: ${occasion.trim()}`,
@@ -275,7 +277,7 @@ export default function Gifting() {
                   </div>
 
                   <h3 className="font-serif text-lg sm:text-xl text-ink">
-                    Signature Gift Packaging, Satin Ribbon &amp; Handwritten Card — PKR 390
+                    {site.giftPackagingLabel} — {pkr(PACKAGING_PRICE)}
                   </h3>
                   
                   <p className="text-xs sm:text-sm text-ink/75 leading-relaxed pt-1">
@@ -300,7 +302,7 @@ export default function Gifting() {
 
                 <div className="sm:text-right shrink-0 bg-white/80 border border-beige px-3 py-2 rounded-sm self-start">
                   <span className="block text-[11px] uppercase tracking-wider text-ink/60 font-sans">Packaging</span>
-                  <span className="font-serif text-lg sm:text-xl text-walnut font-semibold">PKR 390</span>
+                  <span className="font-serif text-lg sm:text-xl text-walnut font-semibold">{pkr(PACKAGING_PRICE)}</span>
                 </div>
               </div>
             </div>
@@ -496,7 +498,7 @@ export default function Gifting() {
             <div className="pt-3 sm:pt-4 border-t border-beige/60 text-[11px] text-ink/60 space-y-1.5 sm:space-y-2">
               <p className="flex items-center gap-2">
                 <Icon n="truck" className="w-3.5 h-3.5 text-walnut shrink-0" />
-                <span>Trackable courier delivery across Pakistan</span>
+                <span>Estimated delivery: {DELIVERY_TIME}</span>
               </p>
               <p className="flex items-center gap-2">
                 <Icon n="box" className="w-3.5 h-3.5 text-walnut shrink-0" />

@@ -4,6 +4,7 @@ import { site } from '../config/site'
 import { useStore } from '../context/StoreContext'
 import { Icon } from './ui'
 import { initAnalytics, track } from '../lib/analytics'
+import Seo from './Seo'
 
 const nav = [
   ['Men', '/shop?category=men'],
@@ -45,14 +46,14 @@ export default function Layout() {
         </svg>
         <span className="leading-none text-center whitespace-nowrap truncate">
           <span className="text-brass font-semibold">Standard Delivery</span>
-          <span> · 3 to 4 Working Days across Pakistan · Shipping PKR 250</span>
+          <span> · Estimated delivery: 3 to 4 working days · Shipping PKR 250</span>
         </span>
       </div>
 
       {/* ─── ANNOUNCEMENT BAR: GIFTING ─── */}
       <div className="bg-walnut text-white/90 text-[12px] text-center py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center overflow-hidden">
         <Link to="/gifting" className="hover:text-white transition-colors inline-flex items-center gap-1.5 leading-none min-w-0">
-          <span className="truncate">Gifting a shawl? Add heirloom packaging with your own handwritten card</span>
+          <span className="truncate">Gifting a shawl? Add simple gift packaging with a handwritten card</span>
           <span className="shrink-0">→</span>
         </Link>
       </div>
@@ -183,6 +184,9 @@ export default function Layout() {
             <p className="text-[10px] tracking-[0.3em] text-brass/80 uppercase mb-3 font-mono">Swat Shawls</p>
             <p className="max-w-sm text-sm leading-relaxed">
               Handcrafted shawls rooted in the heritage of Swat Valley, Pakistan, made for modern wardrobes and meant to be kept.
+            </p>
+            <p className="max-w-sm text-sm leading-relaxed mt-3">
+              Estimated delivery: 3 to 4 working days.
             </p>
           </div>
 

@@ -1,40 +1,81 @@
 import { site } from '../config/site'
 import type { Line, Product } from '../types'
-import { parseWooCategories } from '../context/StoreContext'
+import { parseWooCategories } from './categories'
+import { stripHtml } from './html'
 import type { totals } from './pricing'
+
 const base = site.wc.url.replace(/\/$/, '')
 export const wooEnabled = !!base
-const strip = (h: string) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#8217;/g, '’').trim()
-// Reads products through the WooCommerce API. Appends featured=true if options.featured is true.
-export async function fetchProducts(options?: { featured?: boolean }): Promise<Product[]> {
-  const query = options?.featured ? '?featured=true' : '?per_page=100'
-  const res = await fetch(`${base}/wp-json/wc/store/v1/products${query}`)
-  if (!res.ok) throw new Error('WooCommerce products request failed')
-  const data = await res.json()
-  return data.map((d: any): Product => {
-    const div = 10 ** (d.prices?.currency_minor_unit ?? 0), price = Number(d.prices?.price) / div, reg = Number(d.prices?.regular_price) / div
-    const name = strip(d.name)
-    const { category, categories } = parseWooCategories(d.categories, name)
-    const images = (d.images || []).map((i: any, idx: number) => ({
-      id: i?.id || i?.src || idx,
-      src: typeof i === 'string' ? i : i?.src || '',
-      alt: typeof i === 'object' ? (i?.alt || i?.name || name) : name,
-    })).filter((i: any) => Boolean(i.src))
-    return {
-      id: String(d.id), sku: d.sku || `ST-${d.id}`, name, price, originalPrice: reg > price ? reg : undefined,
-      category, categories, badge: d.tags?.[0]?.name || (d.featured ? 'Featured' : undefined),
-      featured: Boolean(d.featured),
-      description: d.description || d.short_description || '',
-      short_description: d.short_description || '',
-      tone: '#8a8478', stockQuantity: d.is_in_stock ? 1 : 0,
-      image: images[0]?.src || '',
-      images,
-    }
-  })
+
+export function mapWooProduct(d: any): Product {
+  const div = d.prices ? 10 ** (d.prices.currency_minor_unit ?? 0) : 1
+  const price = d.prices?.price != null
+    ? Number(d.prices.price) / div
+    : (parseFloat(d.price || d.regular_price || '0') || 0)
+  const reg = d.prices?.regular_price != null
+    ? Number(d.prices.regular_price) / div
+    : (parseFloat(d.regular_price || '0') || 0)
+  const name = stripHtml(d.name || '')
+  const { category, categories } = parseWooCategories(d.categories, name)
+  const images = (d.images || []).map((i: any, idx: number) => ({
+    id: i?.id || i?.src || idx,
+    src: typeof i === 'string' ? i : i?.src || '',
+    alt: typeof i === 'object' ? (i?.alt || i?.name || name) : name,
+  })).filter((i: any) => Boolean(i.src))
+  const inStock = d.is_in_stock !== undefined
+    ? Boolean(d.is_in_stock)
+    : d.stock_status !== 'outofstock'
+  return {
+    id: String(d.id),
+    sku: d.sku || `ST-${d.id}`,
+    name,
+    price,
+    originalPrice: reg > price ? reg : undefined,
+    category,
+    categories,
+    badge: d.tags?.[0]?.name || (d.featured ? 'Featured' : undefined),
+    featured: Boolean(d.featured ?? d.is_featured),
+    description: d.description || '',
+    short_description: d.short_description || '',
+    tone: '#8a8478',
+    stockQuantity: inStock ? (d.stock_quantity ?? 1) : 0,
+    image: images[0]?.src || '',
+    images,
+  }
 }
 
-export async function fetchFeaturedProducts(): Promise<Product[]> {
-  return fetchProducts({ featured: true })
+async function fetchStorePage(page: number): Promise<any[]> {
+  const params = new URLSearchParams({ per_page: '100', page: String(page) })
+  const res = await fetch(`${base}/wp-json/wc/store/v1/products?${params}`)
+  if (!res.ok) throw new Error('WooCommerce products request failed')
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+export async function fetchProducts(): Promise<Product[]> {
+  if (!wooEnabled) return []
+  const seen = new Set<string>()
+  const products: Product[] = []
+  for (let page = 1; page <= 10; page++) {
+    const rows = await fetchStorePage(page)
+    if (!rows.length) break
+    for (const row of rows) {
+      const product = mapWooProduct(row)
+      if (seen.has(product.id)) continue
+      seen.add(product.id)
+      products.push(product)
+    }
+    if (rows.length < 100) break
+  }
+  return products
+}
+
+export async function fetchProductById(id: string): Promise<Product | null> {
+  if (!wooEnabled || !id) return null
+  const res = await fetch(`${base}/wp-json/wc/store/v1/products/${id}`)
+  if (!res.ok) return null
+  const item = await res.json()
+  return item?.id ? mapWooProduct(item) : null
 }
 export type Customer = {
   name: string
@@ -86,7 +127,7 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
         'Shared Couple Customization': c.sharedCoupleCustomization,
       })
     }),
-    ...lines.filter(l => l.gift).map(l => fee(l.giftDetails?.packaging || 'Heirloom gift box', l.giftDetails?.packagingPrice ?? site.giftBoxPrice, { 'Recipient': l.giftDetails?.recipientName, 'Sender': l.giftDetails?.senderName, 'Gift message': l.giftDetails?.message || l.note, 'Packaging': l.giftDetails?.packaging || l.packing, 'Occasion': l.giftDetails?.occasion, For: l.name })),
+    ...lines.filter(l => l.gift).map(l => fee(l.giftDetails?.packaging || site.giftPackagingLabel, l.giftDetails?.packagingPrice ?? site.giftBoxPrice, { 'Recipient': l.giftDetails?.recipientName, 'Sender': l.giftDetails?.senderName, 'Gift message': l.giftDetails?.message || l.note, 'Packaging': l.giftDetails?.packaging || l.packing, 'Occasion': l.giftDetails?.occasion, For: l.name })),
     ...(t.discount > 0 ? [fee('Couple bundle discount (10%)', -t.discount)] : []),
   ]
 
@@ -97,14 +138,12 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
     paymentMethodTitle = 'Cash on Delivery (COD)'
   } else if (method === 'card') {
     paymentMethodTitle = 'Credit / Debit Card'
-  } else if (method === 'jazzcash') {
-    paymentMethodTitle = 'JazzCash'
   }
 
   const shippingLines = t.shipping > 0 ? [
     {
       method_id: 'flat_rate',
-      method_title: 'Standard Delivery (3 to 4 Working Days)',
+      method_title: `Standard Delivery (${site.deliveryTime})`,
       total: String(t.shipping),
     }
   ] : []
@@ -142,7 +181,7 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
       advance_due_now: String(t.dueNow),
       cod_balance: String(t.balanceCOD),
       delivery_instructions: c.deliveryInstructions,
-      estimated_delivery: '3 to 4 Working Days',
+      estimated_delivery: site.deliveryTime,
       easypaisa_account: method === 'easypaisa' ? '0309 6424489 (Fasih Ul Hassan)' : undefined,
     }),
   }

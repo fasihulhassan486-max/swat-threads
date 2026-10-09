@@ -1,14 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { site } from '../config/site'
 import { useStore } from '../context/StoreContext'
 import { Grid, Icon } from '../components/ui'
-import type { Product } from '../types'
 
 // Shows a photo if the file exists in /public/images; otherwise hides itself (no broken-image icon).
-function Img({ src, alt, className }: { src: string; alt: string; className: string }) {
+function Img({ src, alt, className, priority = false }: { src: string; alt: string; className: string; priority?: boolean }) {
   const [bad, setBad] = useState(false)
-  return bad ? null : <img src={src} alt={alt} className={className} onError={() => setBad(true)} />
+  return bad ? null : (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      fetchPriority={priority ? 'high' : 'auto'}
+      decoding={priority ? 'sync' : 'async'}
+      onError={() => setBad(true)}
+    />
+  )
 }
 
 const trust = [
@@ -53,77 +61,9 @@ const mountainTypes = [
 ]
 
 export default function Home() {
-  const { products, featuredProducts: storeFeatured } = useStore()
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(storeFeatured || [])
+  const { featuredProducts, loading, productsError, reloadProducts } = useStore()
   const [activeMountain, setActiveMountain] = useState<typeof mountainTypes[0] | null>(null)
-
-  useEffect(() => {
-    if (storeFeatured && storeFeatured.length > 0) {
-      setFeaturedProducts(storeFeatured)
-      return
-    }
-
-    const fetchFeatured = async () => {
-      try {
-        const wpUrl = import.meta.env.VITE_WORDPRESS_URL || site.wc.url
-        if (!wpUrl) return
-
-        const baseUrl = wpUrl.replace(/\/$/, '')
-        const consumerKey = import.meta.env.VITE_WC_CONSUMER_KEY || site.wc.key || ''
-        const consumerSecret = import.meta.env.VITE_WC_CONSUMER_SECRET || site.wc.secret || ''
-
-        // Request WooCommerce API specifically appending featured=true
-        const storeEndpoint = `${baseUrl}/wp-json/wc/store/v1/products?featured=true`
-        const v3Endpoint = `${baseUrl}/wp-json/wc/v3/products?featured=true${consumerKey ? `&consumer_key=${consumerKey}&consumer_secret=${consumerSecret}` : ''}`
-
-        let res = await fetch(storeEndpoint)
-        let data: any = null
-
-        if (res.ok) {
-          data = await res.json()
-        }
-        if ((!Array.isArray(data) || data.length === 0) && consumerKey) {
-          res = await fetch(v3Endpoint)
-          if (res.ok) data = await res.json()
-        }
-
-        if (Array.isArray(data) && data.length > 0) {
-          const mapped: Product[] = data.map((item: any) => ({
-            id: String(item.id),
-            sku: item.sku || `ST-${item.id}`,
-            name: (item.name || '').replace(/<[^>]+>/g, '').trim(),
-            price: parseFloat(item.price || item.regular_price || '0') || 0,
-            originalPrice: item.regular_price && parseFloat(item.regular_price) > parseFloat(item.price || '0') ? parseFloat(item.regular_price) : undefined,
-            category: (item.categories?.[0]?.slug || 'men') as any,
-            badge: item.tags?.[0]?.name || 'Featured',
-            featured: true,
-            description: item.description || item.short_description || '',
-            short_description: item.short_description || '',
-            tone: '#8a8478',
-            stockQuantity: item.is_in_stock !== undefined ? (item.is_in_stock ? 10 : 0) : 1,
-            images: (item.images || []).map((img: any, idx: number) => ({
-              id: img?.id || img?.src || idx,
-              src: typeof img === 'string' ? img : img?.src || '',
-              alt: typeof img === 'object' ? (img?.alt || img?.name || item.name || 'Product Image') : (item.name || 'Product Image'),
-            })),
-          }))
-          setFeaturedProducts(mapped)
-        }
-      } catch (err) {
-        console.warn('Failed to fetch featured products for The Selected Shawls:', err)
-      }
-    }
-
-    fetchFeatured()
-  }, [storeFeatured])
-
-  const featuredShawls = (featuredProducts.length > 0)
-    ? featuredProducts.slice(0, 4)
-    : (storeFeatured && storeFeatured.length > 0)
-      ? storeFeatured.slice(0, 4)
-      : products.filter(p => p.featured || p.badge === 'Featured').length > 0
-        ? products.filter(p => p.featured || p.badge === 'Featured').slice(0, 4)
-        : products.slice(0, 4)
+  const featuredShawls = featuredProducts
 
   return (
     <>
@@ -143,7 +83,7 @@ export default function Home() {
           <path d="M30 668l16-80 16 80zM95 668l16-80 16 80zM170 668l16-80 16 80zM240 668l16-80 16 80zM1180 668l16-80 16 80zM1255 668l16-80 16 80zM1330 668l16-80 16 80zM1400 668l16-80 16 80z" fill="#171A18" />
         </svg>
         {site.heroVideo && <video src={site.heroVideo} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />}
-        <Img src={site.heroImage} alt="Misty mountains of Swat Valley" className="absolute inset-0 w-full h-full object-cover" />
+        <Img src={site.heroImage} alt="Misty mountains of Swat Valley, the origin of Viras wool shawls" className="absolute inset-0 w-full h-full object-cover" priority />
         <Img src={site.heroModels} alt="A man and a woman wearing handwoven Swat shawls" className="absolute right-0 bottom-0 h-full w-full md:w-[55%] object-cover md:object-contain object-right-bottom opacity-35 md:opacity-100" />
         <div className="absolute inset-0 bg-gradient-to-r from-coal/95 via-coal/70 to-coal/40 md:to-transparent" />
         <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-12 py-16 sm:py-24 lg:py-28">
@@ -185,7 +125,18 @@ export default function Home() {
           </div>
           <Link to="/shop" className="text-ink text-xs sm:text-sm hover:text-brass py-1 shrink-0">View all →</Link>
         </div>
-        <Grid items={featuredShawls} />
+        {loading ? (
+          <p className="py-12 text-center text-ink/70 font-serif">Loading selected shawls…</p>
+        ) : productsError ? (
+          <div className="py-12 text-center">
+            <p className="text-ink/70 font-serif mb-3">{productsError}</p>
+            <button type="button" className="btn-outline" onClick={reloadProducts}>Try again</button>
+          </div>
+        ) : featuredShawls.length ? (
+          <Grid items={featuredShawls} />
+        ) : (
+          <p className="py-12 text-center text-ink/70 font-serif">No published shawls are available right now. Please check back soon.</p>
+        )}
       </section>
 
       {/* CATEGORY BANNER GRID */}
@@ -216,7 +167,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl text-ink mb-3 sm:mb-4">Customize Your Own Shawl</h2>
             <p className="text-ink/70 mb-7 sm:mb-8 text-sm sm:text-base leading-relaxed">
-              Choose a shawl from our artisan collection and make it your own. Select your preferred color, finish, fabric, or dimensions. Custom orders are prepared within 8–10 days before dispatch.
+              Choose a shawl from our artisan collection and make it your own. Select your preferred color, finish, fabric, or dimensions. Custom orders are prepared before dispatch and delivered in 3 to 4 working days.
             </p>
             <Link to="/customize" className="btn-primary px-10 py-4">Start a custom order</Link>
           </div>

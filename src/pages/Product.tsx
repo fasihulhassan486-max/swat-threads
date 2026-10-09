@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { Icon, Media } from '../components/ui'
+import ExpandableHtml from '../components/ExpandableHtml'
 import { pkr } from '../lib/format'
 import { track } from '../lib/analytics'
-import { site } from '../config/site'
+import { fetchProductById } from '../lib/woocommerce'
+import { hasHtmlText, sanitizeHtml } from '../lib/html'
 import { DELIVERY_TIME, SHIPPING_FEE } from '../lib/pricing'
 import type { Product, ProductImage } from '../types'
 
 export function ProductDetail({ product: propProduct }: { product?: Product } = {}) {
   const { id } = useParams()
   const { products, featuredProducts, loading, inStock, inCart, addProduct, wishlist, toggleWish } = useStore()
-  const [isExpanded, setIsExpanded] = useState(false)
   const [v, setV] = useState(0)
 
   // Find product from props, main catalog, or featured list
@@ -25,52 +26,13 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
     }
   }, [found?.id])
 
-  // Direct fetch fallback if user visits /product/:id directly or on page reload
   useEffect(() => {
-    if (!product && id && !loading) {
-      const fetchSingleProduct = async () => {
-        try {
-          const wpUrl = import.meta.env.VITE_WORDPRESS_URL || site.wc.url
-          if (!wpUrl) return
-          const baseUrl = wpUrl.replace(/\/$/, '')
-          const res = await fetch(`${baseUrl}/wp-json/wc/store/v1/products/${id}`)
-          if (res.ok) {
-            const item = await res.json()
-            if (item && item.id) {
-              const div = 10 ** (item.prices?.currency_minor_unit ?? 0)
-              const price = item.prices?.price ? Number(item.prices.price) / div : (parseFloat(item.price || '0') || 0)
-              const reg = item.prices?.regular_price ? Number(item.prices.regular_price) / div : (parseFloat(item.regular_price || '0') || 0)
-              const rawImages = Array.isArray(item.images) ? item.images : []
-              const imagesList: ProductImage[] = rawImages.map((img: any, idx: number) => ({
-                id: img?.id || img?.src || idx,
-                src: typeof img === 'string' ? img : img?.src || '',
-                alt: typeof img === 'object' ? (img?.alt || img?.name || item.name || 'Product Image') : (item.name || 'Product Image'),
-              })).filter((i: ProductImage) => Boolean(i.src))
-
-              setProduct({
-                id: String(item.id),
-                sku: item.sku || `ST-${item.id}`,
-                name: (item.name || '').replace(/<[^>]+>/g, '').trim(),
-                price,
-                originalPrice: reg > price ? reg : undefined,
-                category: (item.categories?.[0]?.slug || 'men') as any,
-                badge: item.tags?.[0]?.name || (item.featured ? 'Featured' : undefined),
-                featured: Boolean(item.featured),
-                description: item.description || item.short_description || '',
-                short_description: item.short_description || '',
-                tone: '#8a8478',
-                stockQuantity: item.is_in_stock ? 10 : 0,
-                image: imagesList[0]?.src || '',
-                images: imagesList,
-              })
-            }
-          }
-        } catch (err) {
-          console.warn('[ProductDetail] Single product direct fetch error:', err)
-        }
-      }
-      fetchSingleProduct()
-    }
+    if (product || !id || loading) return
+    let cancelled = false
+    fetchProductById(id).then(item => {
+      if (!cancelled && item) setProduct(item)
+    })
+    return () => { cancelled = true }
   }, [id, product, loading])
 
   if (loading && !product) return <div className="container-x py-16 sm:py-20 text-ink/70 font-serif">Loading…</div>
@@ -89,8 +51,29 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
   })
   const currentImg = productImages[v] || productImages[0]
 
+  const categoryHref = product.category === 'women'
+    ? '/shop?category=women'
+    : product.category === 'couple-bundle'
+      ? '/couple-bundle'
+      : '/shop?category=men'
+  const categoryLabel = product.category === 'women'
+    ? "Women's Shawls"
+    : product.category === 'couple-bundle'
+      ? 'Couple Bundles'
+      : "Men's Shawls"
+  const shortHtml = sanitizeHtml(product.short_description || '')
+  const hasShort = hasHtmlText(product.short_description || '')
+  const hasLong = hasHtmlText(product.description || '')
+
   return (
-    <div className="product-details-container container-x py-8 sm:py-12">
+    <article className="product-details-container container-x py-8 sm:py-12">
+      <nav aria-label="Breadcrumb" className="text-xs text-ink/60 mb-5 flex flex-wrap items-center gap-1.5">
+        <Link to="/" className="hover:text-walnut">Home</Link>
+        <span aria-hidden="true">/</span>
+        <Link to={categoryHref} className="hover:text-walnut">{categoryLabel}</Link>
+        <span aria-hidden="true">/</span>
+        <span className="text-ink/80">{product.name}</span>
+      </nav>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
         {/* Product Image section with ALT tag */}
         <div className="product-gallery">
@@ -99,7 +82,11 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
               <img
                 key={currentImg.id || currentImg.src}
                 src={currentImg.src}
-                alt={currentImg.alt || product.name || "Product Image"}
+                alt={currentImg.alt || product.name || 'Product image'}
+                width={800}
+                height={1000}
+                fetchPriority="high"
+                decoding="async"
                 className="w-full h-auto object-cover"
               />
             ) : (
@@ -145,11 +132,12 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
             )}
           </div>
 
-          {/* Short Description & Add to Cart Area */}
-          <div
-            className="short-description text-ink/75 my-5 text-sm sm:text-base leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: product.short_description || '' }}
-          />
+          {hasShort && (
+            <div
+              className="short-description text-ink/75 my-5 text-sm sm:text-base leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: shortHtml }}
+            />
+          )}
 
           <p className={`text-xs sm:text-sm mb-2 ${ok ? 'text-emerald-700 font-medium' : 'text-ink/60'}`}>
             {ok ? '● In stock — only one piece available' : '○ Sold — one of one'}
@@ -157,7 +145,7 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
 
           <p className="text-xs text-ink/75 flex items-center gap-1.5 mb-5 font-sans">
             <Icon n="truck" className="w-3.5 h-3.5 text-brass shrink-0" />
-            <span>Standard Delivery: <strong>{DELIVERY_TIME}</strong> · Shipping {pkr(SHIPPING_FEE)}</span>
+            <span>Estimated delivery: {DELIVERY_TIME} · Shipping {pkr(SHIPPING_FEE)}</span>
           </p>
 
           <div className="flex gap-3">
@@ -187,29 +175,20 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
             </Link>
           </div>
 
-          {/* Full Description Section with 2-line clamp & Read More toggle */}
-          <div className="mt-8 border-t pt-6">
-            <h3 className="text-xl font-bold mb-3">Product Description</h3>
-            
-            <div 
-              className={`prose max-w-none transition-all duration-300 ${
-                !isExpanded ? 'line-clamp-2 overflow-hidden' : ''
-              }`}
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
+          {hasLong && (
+            <section className="mt-8 border-t border-beige pt-6" aria-label="Product details">
+              <h2 className="text-lg sm:text-xl text-ink mb-3">About this shawl</h2>
+              <ExpandableHtml html={product.description} />
+            </section>
+          )}
 
-            {product.description && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="mt-2 text-sm font-semibold underline text-black hover:text-gray-600 focus:outline-none"
-              >
-                {isExpanded ? 'Read Less' : 'Read More'}
-              </button>
-            )}
-          </div>
+          <p className="mt-6 text-xs text-ink/60">
+            Looking for a personal finish? <Link to={`/customize?id=${product.id}`} className="text-walnut underline underline-offset-2">Start a custom shawl</Link>
+            {' '}or browse the <Link to={categoryHref} className="text-walnut underline underline-offset-2">{categoryLabel.toLowerCase()}</Link>.
+          </p>
         </div>
       </div>
-    </div>
+    </article>
   )
 }
 

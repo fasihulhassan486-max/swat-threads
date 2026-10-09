@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { Media, Icon } from '../components/ui'
-import { customPrice, WOMEN_EMBROIDERY_PRICE } from '../lib/pricing'
+import { customPrice, CUSTOMIZATION_OPTION_PRICE, WOMEN_EMBROIDERY_PRICE } from '../lib/pricing'
 import { pkr } from '../lib/format'
 import { site } from '../config/site'
 import type { Product, CustomSpec } from '../types'
@@ -43,20 +43,6 @@ const WOMENS_STYLES = ['Plain', 'Embroidered', 'Handwoven Border', 'Custom'] as 
 const COUPLE_MENS_DESIGNS = ['Plain', 'Border'] as const
 const COUPLE_WOMENS_DESIGNS = ['Plain', 'Embroidered'] as const
 
-// Fallback couple bundle when WooCommerce doesn't have a dedicated bundle product
-const DEFAULT_COUPLE_BUNDLE: Product = {
-  id: 'couple-custom-bundle',
-  sku: 'ST-CB-CUSTOM',
-  name: 'His & Hers Heirloom Bundle',
-  price: 19500,
-  category: 'couple-bundle',
-  badge: 'Couple Set',
-  tone: '#8a8478',
-  stockQuantity: 10,
-  images: [],
-  description: 'A coordinated heirloom pair of one Men’s shawl and one Women’s shawl, custom crafted by Swat artisans with matching complimentary traditional gifts.',
-}
-
 export default function Customize() {
   const { addCustom, products } = useStore()
   const nav = useNavigate()
@@ -70,12 +56,8 @@ export default function Customize() {
   useEffect(() => {
     const id = searchParams.get('id')
     if (id) {
-      if (id === 'couple-custom-bundle') {
-        setBase(DEFAULT_COUPLE_BUNDLE)
-      } else {
-        const found = products.find(p => p.id === id)
-        if (found) setBase(found)
-      }
+      const found = products.find(p => p.id === id)
+      if (found) setBase(found)
     }
   }, [searchParams, products])
 
@@ -197,7 +179,7 @@ export default function Customize() {
       return customPrice(base.price, 'Standard Size', womensStyle)
     }
     // Couple bundle: use base bundle price plus any design add-ons
-    const menExtra = coupleMensDesign === 'Border' ? 1000 : 0
+    const menExtra = coupleMensDesign === 'Border' ? CUSTOMIZATION_OPTION_PRICE : 0
     const womenExtra = coupleWomensDesign === 'Embroidered' ? WOMEN_EMBROIDERY_PRICE : 0
     return base.price + menExtra + womenExtra
   }, [base, context, mensSize, mensStyle, womensStyle, coupleMensDesign, coupleWomensDesign])
@@ -328,15 +310,14 @@ export default function Customize() {
   // ─── FILTERED PRODUCTS LIST ────────────────────────────────────────────────
 
   const coupleProducts = useMemo(() => {
-    const list = products.filter(p => p.category === 'couple-bundle' || p.category === 'couple')
-    return list.length ? list : [DEFAULT_COUPLE_BUNDLE]
+    return products.filter(p => p.category === 'couple-bundle' || p.category === 'couple')
   }, [products])
 
   const displayedProducts = useMemo(() => {
     if (activeTab === 'men') return products.filter(p => p.category === 'men')
     if (activeTab === 'women') return products.filter(p => p.category === 'women')
     if (activeTab === 'couple') return coupleProducts
-    return [...products, ...(products.some(p => p.category === 'couple-bundle') ? [] : [DEFAULT_COUPLE_BUNDLE])]
+    return products
   }, [products, activeTab, coupleProducts])
 
   return (
@@ -346,7 +327,7 @@ export default function Customize() {
         <p className="eyebrow mb-2">Bespoke Artisan Workshop</p>
         <h1 className="text-3xl sm:text-4xl text-ink font-light mb-3">Customize Your Shawl</h1>
         <p className="text-ink/70 text-sm sm:text-base leading-relaxed">
-          Select a base design from our artisan collection. Tailor the color, finish, dimensions, or fabric to your exact taste. Handwoven on traditional wooden looms in Swat Valley and delivered in 8–10 days.
+          Select a base design from our artisan collection. Tailor the color, finish, dimensions, or fabric to your exact taste. Handwoven on traditional wooden looms in Swat Valley and delivered in 3 to 4 working days.
         </p>
       </div>
 
@@ -514,8 +495,8 @@ export default function Customize() {
                         >
                           <span>{s}</span>
                           {s === 'Border' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
-                          {s === 'Traditional Pattern' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,500</span>}
-                          {s === 'Custom' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,500</span>}
+                          {s === 'Traditional Pattern' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
+                          {s === 'Custom' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
                         </button>
                       )
                     })}
@@ -545,7 +526,7 @@ export default function Customize() {
                           {sz === 'Standard Size' ? (
                             <span className="block text-[10px] opacity-80 mt-0.5">Approx 52" × 104"</span>
                           ) : (
-                            <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,500</span>
+                            <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>
                           )}
                         </button>
                       )
@@ -720,7 +701,7 @@ export default function Customize() {
                           <span>{s}</span>
                           {s === 'Handwoven Border' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
                           {s === 'Embroidered' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
-                          {s === 'Custom' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,500</span>}
+                          {s === 'Custom' && <span className="block text-[10px] opacity-80 mt-0.5">+PKR 1,000</span>}
                         </button>
                       )
                     })}

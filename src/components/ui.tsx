@@ -14,17 +14,43 @@ export const Icon = ({ n, className = 'w-5 h-5', fill = false }: { n: string; cl
   <svg viewBox="0 0 24 24" className={className} fill={fill ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={P[n]} /></svg>)
 export const Swatch = ({ tone, v = 0, className = '' }: { tone: string; v?: number; className?: string }) => (
   <div className={`w-full h-full ${className}`} style={{ background: `repeating-linear-gradient(${45 + v * 30}deg, ${tone} 0 6px, ${tone}dd 6px 7px), ${tone}` }} />)
-export const Media = ({ p, v = 0 }: { p: Product; v?: number }) => {
+export const Media = ({ p, v = 0, priority = false }: { p: Product; v?: number; priority?: boolean }) => {
   const item = p.images?.[v]
   const src = typeof item === 'string' ? item : item?.src || (v === 0 ? p.image : undefined)
-  const alt = (typeof item === 'object' && item?.alt) ? item.alt : p.name || 'Product Image'
-  return src ? <img src={src} alt={alt} className="w-full h-full object-cover" /> : <Swatch tone={p.tone} v={v} />
+  const alt = (typeof item === 'object' && item?.alt) ? item.alt : p.name || 'Product image'
+  return src ? (
+    <img
+      src={src}
+      alt={alt}
+      width={480}
+      height={600}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      className="w-full h-full object-cover"
+    />
+  ) : <Swatch tone={p.tone} v={v} />
 }
 export function GiftFields({ gift, note, packing, onChange }: { gift: boolean; note: string; packing: string; onChange: (g: boolean, n: string, pk: string) => void }) {
-  return (<div className="space-y-2 text-sm">
-    <label className="flex items-center gap-2"><input type="checkbox" checked={gift} onChange={e => onChange(e.target.checked, note, packing)} /> Heirloom pine wooden gift box — +{pkr(site.giftBoxPrice)}</label>
-    {gift && <><textarea className="field" rows={3} placeholder="Gift message — write exactly what you want on the card" value={note} onChange={e => onChange(true, e.target.value, packing)} />
-      <textarea className="field" rows={2} placeholder="Packing preferences (wrapping, ribbon colour, occasion…)" value={packing} onChange={e => onChange(true, note, e.target.value)} /></>}</div>)
+  const packagingLabel = site.giftPackagingLabel
+  return (
+    <div className="space-y-2 text-sm">
+      <label className="flex items-start gap-2">
+        <input
+          type="checkbox"
+          className="mt-1"
+          checked={gift}
+          onChange={e => onChange(e.target.checked, note, e.target.checked ? (packing || packagingLabel) : packing)}
+        />
+        <span>Simple gift packaging with a handwritten card — +{pkr(site.giftBoxPrice)}</span>
+      </label>
+      {gift && (
+        <>
+          <textarea className="field" rows={3} placeholder="Gift message — write exactly what you want on the card" value={note} onChange={e => onChange(true, e.target.value, packing || packagingLabel)} />
+          <textarea className="field" rows={2} placeholder="Packing preferences (ribbon colour, occasion…)" value={packing} onChange={e => onChange(true, note, e.target.value)} />
+        </>
+      )}
+    </div>
+  )
 }
 export function ProductCard({ p }: { p: Product }) {
   const { inStock, wishlist, toggleWish } = useStore()

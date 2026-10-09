@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { totals, SHIPPING_FEE, FREE_SHIPPING_THRESHOLD, DELIVERY_TIME, EASYPAISA_NUMBER, EASYPAISA_ACCOUNT_NAME } from '../lib/pricing'
+import { totals, SHIPPING_FEE, DELIVERY_TIME, EASYPAISA_NUMBER, EASYPAISA_ACCOUNT_NAME } from '../lib/pricing'
+import { site } from '../config/site'
 import { createOrder, Customer } from '../lib/woocommerce'
 import { track } from '../lib/analytics'
 import { pkr } from '../lib/format'
@@ -147,7 +148,7 @@ export default function Checkout() {
   }
 
   const paymentOptions = [
-    { id: 'easypaisa', label: 'EasyPaisa Online Transfer', badge: 'Recommended' },
+    { id: 'easypaisa', label: 'EasyPaisa', badge: 'Recommended' },
     { id: 'cod', label: 'Cash on Delivery (COD)' },
     { id: 'card', label: 'Credit / Debit Card' },
   ]
@@ -197,7 +198,7 @@ export default function Checkout() {
                   type="tel"
                   required
                   className="field"
-                  placeholder="e.g. 0329 6424489 or +923296424489"
+                  placeholder="e.g. 03001234567 or +923001234567"
                   value={f.phone}
                   onChange={e => setF({ ...f, phone: e.target.value })}
                 />
@@ -351,17 +352,17 @@ export default function Checkout() {
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" />
                           <span>EasyPaisa Transfer Details</span>
                         </div>
-                        <div className="bg-white border border-emerald-200 p-3 rounded-sm space-y-1 font-mono">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-ink/60 font-sans">Payment Method:</span>
+                        <div className="bg-white border border-emerald-200 p-3 rounded-sm space-y-2 font-mono">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 text-xs">
+                            <span className="text-ink/60 font-sans">Payment method</span>
                             <span className="font-bold text-ink">EasyPaisa</span>
                           </div>
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="text-ink/60 font-sans">EasyPaisa Number:</span>
-                            <span className="font-bold text-emerald-800 text-base">{EASYPAISA_NUMBER}</span>
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 text-sm">
+                            <span className="text-ink/60 font-sans">Account number</span>
+                            <span className="font-bold text-emerald-800 text-base break-all">{EASYPAISA_NUMBER}</span>
                           </div>
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-ink/60 font-sans">Account Name:</span>
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 text-xs">
+                            <span className="text-ink/60 font-sans">Account title</span>
                             <span className="font-bold text-ink">{EASYPAISA_ACCOUNT_NAME}</span>
                           </div>
                         </div>
@@ -384,8 +385,6 @@ export default function Checkout() {
                         Secure credit or debit card payment. You will be redirected to the secure bank gateway.
                       </div>
                     )}
-
-                    {/* JAZZCASH DETAILS BOX - REMOVED */}
                   </div>
                 )
               })}
@@ -414,7 +413,7 @@ export default function Checkout() {
                       {line.custom.size && <p>Dimensions: {line.custom.size}</p>}
                       {line.custom.style && <p>Style: {line.custom.style}</p>}
                       {(line.custom.style === 'Embroidered' || line.custom.pattern === 'Embroidered' || line.custom.womensDesign === 'Embroidered') && (
-                        <p className="text-walnut font-medium">Embroidery: PKR 1,000 Included</p>
+                        <p className="text-walnut font-medium">Embroidery add-on: PKR 1,000</p>
                       )}
                       {line.custom.notes && <p className="italic">Note: “{line.custom.notes}”</p>}
                     </div>
@@ -422,7 +421,7 @@ export default function Checkout() {
 
                   {line.gift && (
                     <p className="text-[11px] text-brass mt-0.5">
-                      + Heirloom Gift Box ({pkr(line.giftDetails?.packagingPrice ?? 390)})
+                      + Gift packaging ({pkr(line.giftDetails?.packagingPrice ?? site.giftBoxPrice)})
                     </p>
                   )}
                 </div>
@@ -454,16 +453,9 @@ export default function Checkout() {
               <div className="flex justify-between items-center text-ink/80 border-t border-beige/40 pt-2">
                 <div>
                   <span className="block font-medium text-ink">Shipping</span>
-                  <span className="text-[10px] text-ink/50">{DELIVERY_TIME}</span>
+                  <span className="text-[10px] text-ink/50">Estimated delivery: {DELIVERY_TIME}</span>
                 </div>
-                {t.shipping === 0 ? (
-                  <span className="font-semibold text-emerald-700 flex items-center gap-1">
-                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-xs border border-emerald-200 uppercase tracking-wide font-semibold">Free</span>
-                    (orders above {pkr(FREE_SHIPPING_THRESHOLD)})
-                  </span>
-                ) : (
-                  <span className="font-semibold text-ink">{pkr(SHIPPING_FEE)}</span>
-                )}
+                <span className="font-semibold text-ink">{pkr(SHIPPING_FEE)}</span>
               </div>
 
               {/* FINAL TOTAL */}

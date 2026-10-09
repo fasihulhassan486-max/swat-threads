@@ -6,7 +6,7 @@ export default function Shop() {
   const [q] = useSearchParams()
   const rawCat = q.get('category')
   const cat = rawCat ? rawCat.trim().toLowerCase() : null
-  const { products, wishlist, loading } = useStore()
+  const { products, wishlist, loading, productsError, reloadProducts } = useStore()
 
   const isWishlist = Boolean(q.get('wishlist'))
   const list = isWishlist
@@ -52,6 +52,11 @@ export default function Shop() {
 
       {loading ? (
         <div className="py-16 text-center text-ink/70 font-serif">Loading collection…</div>
+      ) : productsError && !isWishlist ? (
+        <div className="py-16 text-center">
+          <p className="text-ink/70 font-serif mb-3">{productsError}</p>
+          <button type="button" className="btn-outline" onClick={reloadProducts}>Try again</button>
+        </div>
       ) : list.length ? (
         <Grid items={list} />
       ) : (
