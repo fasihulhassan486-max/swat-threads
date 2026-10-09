@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { totals, SHIPPING_FEE, DELIVERY_TIME, EASYPAISA_NUMBER, EASYPAISA_ACCOUNT_NAME } from '../lib/pricing'
+import { totals, DELIVERY_TIME, EASYPAISA_NUMBER, EASYPAISA_ACCOUNT_NAME, shippingOfferMessage } from '../lib/pricing'
 import { site } from '../config/site'
 import { createOrder, Customer } from '../lib/woocommerce'
 import { track } from '../lib/analytics'
@@ -119,12 +119,14 @@ export default function Checkout() {
         state: {
           orderId,
           total: t.total,
+          orderValue: t.orderValue,
           dueNow,
           bal,
           method,
           customer: customerData,
           lines,
           shipping: t.shipping,
+          shippingMessage: shippingOfferMessage(t.orderValue, true),
           estimatedDelivery: DELIVERY_TIME,
         },
       })
@@ -455,8 +457,11 @@ export default function Checkout() {
                   <span className="block font-medium text-ink">Shipping</span>
                   <span className="text-[10px] text-ink/50">Estimated delivery: {DELIVERY_TIME}</span>
                 </div>
-                <span className="font-semibold text-ink">{pkr(SHIPPING_FEE)}</span>
+                <span className={`font-semibold ${t.shipping === 0 ? 'text-emerald-700' : 'text-ink'}`}>
+                  {t.shipping === 0 ? 'Free Shipping' : `Shipping: ${pkr(t.shipping)}`}
+                </span>
               </div>
+              <p className="text-[10px] text-ink/60 text-right">{shippingOfferMessage(t.orderValue, true)}</p>
 
               {/* FINAL TOTAL */}
               <div className="border-t border-beige pt-3 flex justify-between items-baseline font-serif">

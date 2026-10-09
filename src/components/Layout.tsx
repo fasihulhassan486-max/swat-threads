@@ -5,6 +5,7 @@ import { useStore } from '../context/StoreContext'
 import { Icon } from './ui'
 import { initAnalytics, track } from '../lib/analytics'
 import Seo from './Seo'
+import { shippingOfferMessage, totals } from '../lib/pricing'
 
 const nav = [
   ['Men', '/shop?category=men'],
@@ -27,6 +28,8 @@ const info = [
 
 export default function Layout() {
   const { lines, wishlist } = useStore()
+  const cartTotals = totals(lines)
+  const shippingMessage = shippingOfferMessage(cartTotals.orderValue, lines.length > 0)
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
 
@@ -39,14 +42,13 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
-      {/* ─── ANNOUNCEMENT BAR: STANDARD DELIVERY ─── */}
+      {/* ─── ANNOUNCEMENT BAR: SHIPPING OFFER ─── */}
       <div className="bg-[#1C1F1D] text-white/90 text-[12px] py-2 px-4 sm:px-6 lg:px-12 flex items-center justify-center gap-2 tracking-wide font-sans overflow-hidden">
         <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0 text-brass" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a1.5 1.5 0 1 0 0-3M17 19a1.5 1.5 0 1 0 0-3" />
         </svg>
         <span className="leading-none text-center whitespace-nowrap truncate">
-          <span className="text-brass font-semibold">Standard Delivery</span>
-          <span> · Estimated delivery: 3 to 4 working days · Shipping PKR 250</span>
+          <span className="text-brass font-semibold">{shippingMessage}</span>
         </span>
       </div>
 
@@ -164,6 +166,14 @@ export default function Layout() {
                   <span>Cart ({lines.length})</span>
                 </Link>
               </div>
+              <p className="border-t border-beige/50 pt-3 text-xs text-ink/70">
+                {shippingMessage}
+                {lines.length > 0 && (
+                  <span className="block mt-1">
+                    {cartTotals.shipping === 0 ? 'Shipping: Free' : `Shipping: PKR ${cartTotals.shipping.toLocaleString('en-US')}`}
+                  </span>
+                )}
+              </p>
             </nav>
           </div>
         )}

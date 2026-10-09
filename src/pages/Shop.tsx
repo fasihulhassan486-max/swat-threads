@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useStore, matchesCategory } from '../context/StoreContext'
 import { Grid } from '../components/ui'
 
@@ -13,8 +14,8 @@ export default function Shop() {
     ? products.filter(p => wishlist.includes(p.id))
     : products.filter(p => matchesCategory(p, cat))
 
-  const isMen = cat === 'men' || cat === 'mens'
-  const isWomen = cat === 'women' || cat === 'womens'
+  const isMen = cat === 'men' || cat === 'mens' || cat === 'men-shawls' || cat === 'mens-shawls'
+  const isWomen = cat === 'women' || cat === 'womens' || cat === 'women-shawls' || cat === 'womens-shawls'
   const isCouple = cat === 'couple-bundle' || cat === 'couple' || cat === 'couples'
 
   const title = isWishlist
@@ -39,6 +40,13 @@ export default function Shop() {
 
   return (
     <div className="container-x py-8 sm:py-12">
+      {!isWishlist && (
+        <nav aria-label="Breadcrumb" className="mb-5 text-xs text-ink/60 flex items-center gap-1.5">
+          <Link to="/" className="hover:text-walnut">Home</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page" className="text-ink/80">{title}</span>
+        </nav>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8 pb-4 border-b border-beige">
         <div className="max-w-2xl">
           <p className="eyebrow mb-1">VIRAS · Swat Valley</p>

@@ -1,5 +1,6 @@
 import type { Line } from '../types'
 import { site } from '../config/site'
+import { pkr } from './format'
 
 export const CUSTOMIZATION_OPTION_PRICE = 1000
 
@@ -32,7 +33,15 @@ export const customPrice = (base: number, size: string = 'Standard Size', patter
   base + (SIZE_EXTRA[size] ?? 0) + (PATTERN_EXTRA[pattern] ?? 0)
 
 export const SHIPPING_FEE = site.shippingFee ?? 250
-export const calcShipping = () => SHIPPING_FEE
+export const FREE_SHIPPING_THRESHOLD = 5000
+export const calcShipping = (amount: number = 0) =>
+  amount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
+
+export function shippingOfferMessage(amount: number, hasItems: boolean) {
+  if (amount >= FREE_SHIPPING_THRESHOLD) return 'Free Shipping'
+  if (!hasItems) return `Free Shipping on orders above ${pkr(FREE_SHIPPING_THRESHOLD)}`
+  return `Add ${pkr(FREE_SHIPPING_THRESHOLD - amount)} more to get Free Shipping`
+}
 
 export function bundleDiscount(men: number[], women: number[]) {
   const n = Math.min(men.length, women.length)
@@ -45,9 +54,9 @@ export function totals(lines: Line[]) {
   const subtotal = lines.reduce((a, l) => a + l.unit, 0)
   const gift = lines.filter(l => l.gift).reduce((sum, l) => sum + (l.giftDetails?.packagingPrice ?? site.giftBoxPrice), 0)
   const orderValue = subtotal - discount + gift
-  const shipping = lines.length > 0 ? calcShipping() : 0
+  const shipping = lines.length > 0 ? calcShipping(orderValue) : 0
   const total = orderValue + shipping
   const customTotal = lines.filter(l => l.custom).reduce((a, l) => a + l.unit, 0)
   const balanceCOD = Math.round(customTotal * (1 - site.advanceRate))
-  return { subtotal, discount, gift, shipping, total, hasCustom: customTotal > 0, customTotal, balanceCOD, dueNow: total - balanceCOD }
+  return { subtotal, discount, gift, orderValue, shipping, total, hasCustom: customTotal > 0, customTotal, balanceCOD, dueNow: total - balanceCOD }
 }

@@ -4,6 +4,7 @@ import { useStore } from '../context/StoreContext'
 import { matchesCategory } from '../context/StoreContext'
 import { site } from '../config/site'
 import { pkr } from '../lib/format'
+import { sanitizeHtml } from '../lib/html'
 import { Icon, Media } from '../components/ui'
 import type { Product } from '../types'
 
@@ -172,7 +173,7 @@ export default function Couple() {
                     {p.short_description ? (
                       <div
                         className="text-xs text-ink/70 leading-relaxed mb-4 line-clamp-3 prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: p.short_description }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(p.short_description || '') }}
                       />
                     ) : (
                       /* INCLUSIONS LIST as fallback */

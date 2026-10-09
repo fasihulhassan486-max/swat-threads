@@ -1,4 +1,3 @@
-const env = import.meta.env
 export const site = {
   name: 'VIRAS | Swat Shawls',
   url: 'https://www.virasstore.com',
@@ -16,8 +15,8 @@ export const site = {
   heroModels: '/images/hero-models.png',
   heroVideo: '', // optional looping .mp4 for the home hero
   storyVideo: '/videos/our-story.mp4', // drop your file at public/videos/our-story.mp4
-  ga4Id: (env.VITE_GA4_ID as string) ?? '', // Google Analytics 4 (G-XXXXXXX)
-  metaPixelId: (env.VITE_META_PIXEL_ID as string) ?? '', // Meta (Facebook/Instagram) Pixel
+  ga4Id: import.meta.env.VITE_GA4_ID ?? '', // Google Analytics 4 (G-XXXXXXX)
+  metaPixelId: import.meta.env.VITE_META_PIXEL_ID ?? '', // Meta (Facebook/Instagram) Pixel
   giftBoxPrice: 390,
   giftPackagingLabel: 'Signature Gift Packaging, Satin Ribbon & Handwritten Card',
   coupleDiscount: 0.1, advanceRate: 0.5,
@@ -27,11 +26,9 @@ export const site = {
     number: '0309 6424489',
     accountName: 'Fasih Ul Hassan',
   },
-  wc: { // WooCommerce — set these in .env (see .env.example)
-    url: (env.VITE_WORDPRESS_URL as string) ?? (env.VITE_WC_URL as string) ?? '',
-    key: (env.VITE_WC_CONSUMER_KEY as string) ?? (env.VITE_WC_KEY as string) ?? '',
-    secret: (env.VITE_WC_CONSUMER_SECRET as string) ?? (env.VITE_WC_SECRET as string) ?? '',
-    orderProxy: (env.VITE_ORDER_PROXY_URL as string) ?? '',
+  wc: { // Public WooCommerce Store API and trusted order endpoint
+    url: import.meta.env.VITE_WORDPRESS_URL ?? import.meta.env.VITE_WC_URL ?? '',
+    orderProxy: import.meta.env.VITE_ORDER_PROXY_URL ?? '',
     paymentIds: { easypaisa: 'easypaisa', cod: 'cod', card: 'card' } as Record<string, string>,
   },
 }

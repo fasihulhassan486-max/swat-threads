@@ -6,7 +6,7 @@ import { pkr } from '../lib/format'
 const pages: Record<string, [string, string[]]> = {
   '/our-story': ['Our Story', ['Viras brings premium wool shawls from the valleys of Swat, Pakistan, to modern wardrobes. Each piece is sourced from local weavers, selected by hand, and checked before it is packed.', 'We keep the collection small on purpose — most pieces are one of one, made to be worn and kept.']],
   '/contact': ['Contact', ['Reach us on WhatsApp, email, or social media for orders, custom shawls, and questions about Swati wool shawls.']],
-  '/shipping': ['Shipping Policy', ['We deliver nationwide across Pakistan. Estimated delivery is 3 to 4 working days. Custom orders are prepared before dispatch and follow the same delivery estimate.', 'The standard delivery charge is PKR 250 per order. Cash on Delivery and EasyPaisa transfers are accepted. We do not promise weekend or public-holiday delivery.']],
+  '/shipping': ['Shipping Policy', ['We deliver nationwide across Pakistan. Estimated delivery is 3 to 4 working days. Custom orders are prepared before dispatch and follow the same delivery estimate.', 'Standard delivery is PKR 250 for orders below PKR 5,000. Orders of PKR 5,000 or more qualify for free shipping. Cash on Delivery and EasyPaisa transfers are accepted. We do not promise weekend or public-holiday delivery.']],
   '/returns': ['Returns & Refunds', ['Contact us within 7 days of delivery if there is a problem with your piece. Custom orders are made to your specification and are non-refundable except for defects.']],
   '/privacy': ['Privacy Policy', ['We only collect the details needed to deliver your order and never sell your data.', 'We use the Meta Pixel (Facebook and Instagram) to measure our advertising and show relevant ads to people who visited the site.']],
   '/terms': ['Terms', ['By ordering you agree that each piece is single-inventory and available while stock lasts.']],
@@ -43,6 +43,7 @@ export const Confirmation = () => {
     state?: {
       orderId?: string | number
       total?: number
+      orderValue?: number
       dueNow?: number
       bal?: number
       method?: string
@@ -55,6 +56,7 @@ export const Confirmation = () => {
       }
       lines?: any[]
       shipping?: number
+      shippingMessage?: string
       estimatedDelivery?: string
     }
   }
@@ -121,6 +123,16 @@ export const Confirmation = () => {
           <div>
             <span className="text-[10px] uppercase tracking-wider text-ink/50 block mb-0.5">Estimated Delivery</span>
             <span className="font-medium text-ink">{estDelivery}</span>
+          </div>
+
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-ink/50 block mb-0.5">Shipping</span>
+            <span className={`font-medium ${state?.shipping === 0 ? 'text-emerald-700' : 'text-ink'}`}>
+              {state?.shipping === 0 ? 'Free Shipping' : `Shipping: ${pkr(state?.shipping ?? 250)}`}
+            </span>
+            {state?.shippingMessage && (
+              <span className="block text-[11px] text-ink/60 mt-0.5">{state.shippingMessage}</span>
+            )}
           </div>
 
           {state?.customer?.phone && (

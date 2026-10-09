@@ -1,7 +1,9 @@
 # Swat Threads
 `npm install` then `npm run dev`.
 - Config: src/config/site.ts (WhatsApp, email, social links). Secrets/IDs: copy .env.example to .env.
-- WooCommerce: set VITE_WC_URL. Create categories with slugs `men` and `women`, set stock 1 per product. Products load from the public Store API; orders POST to /wc/v3/orders (use VITE_ORDER_PROXY_URL in production so keys stay secret).
+- WooCommerce: set `VITE_WC_URL` to the WordPress site URL. Public catalog requests use the unauthenticated WooCommerce Store API (`/wp-json/wc/store/v1/products`), which returns published products and supports 100-item pagination and the featured filter. Configure WordPress CORS to allow public GET requests from the storefront. Never put WooCommerce consumer keys/secrets in Vite variables; all `VITE_` values are shipped to the browser. Set `VITE_ORDER_PROXY_URL` to a trusted server-side endpoint that validates the checkout payload and submits orders using credentials held only on the server. Create product categories with slugs `men` or `mens-shawls`, and `women` or `womens-shawls`.
+- Production setup: configure the WordPress/API host to return CORS headers for `https://www.virasstore.com` (and the local development origin), allowing `GET`/`OPTIONS` for public Store API catalog reads. The order proxy must allow the storefront origin for `POST`/`OPTIONS`, validate customer/customization input and product IDs, recompute prices and shipping (PKR 250 below PKR 5,000; free at or above PKR 5,000), and create the order server-side. Do not point `VITE_ORDER_PROXY_URL` at WooCommerce's core `/wp-json/wc/v3/orders` endpoint.
+- Security: rotate any WooCommerce API keys that were previously committed or used in a browser build. Store replacement credentials only in the server-side order proxy environment.
 - Analytics: set VITE_GA4_ID (Google Analytics 4) and VITE_META_PIXEL_ID (Meta). Both get the same events. Events sent: PageView, ViewContent, AddToCart, InitiateCheckout, Purchase.
 - Our Story video: save as public/videos/our-story.mp4.
 - Hosting: enable SPA rewrite (all routes -> index.html) so shared/ad links open correctly.

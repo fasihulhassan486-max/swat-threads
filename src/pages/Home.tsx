@@ -11,7 +11,10 @@ function Img({ src, alt, className, priority = false }: { src: string; alt: stri
     <img
       src={src}
       alt={alt}
+      width={1600}
+      height={1000}
       className={className}
+      loading={priority ? 'eager' : 'lazy'}
       fetchPriority={priority ? 'high' : 'auto'}
       decoding={priority ? 'sync' : 'async'}
       onError={() => setBad(true)}
@@ -135,7 +138,7 @@ export default function Home() {
         ) : featuredShawls.length ? (
           <Grid items={featuredShawls} />
         ) : (
-          <p className="py-12 text-center text-ink/70 font-serif">No published shawls are available right now. Please check back soon.</p>
+          <p className="py-12 text-center text-ink/70 font-serif">No featured products available.</p>
         )}
       </section>
 
@@ -268,7 +271,7 @@ export default function Home() {
             
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div className="h-56 sm:h-72 md:h-full min-h-[220px] relative bg-black">
-                <img src={activeMountain.image} alt={activeMountain.name} className="w-full h-full object-cover" />
+                <img src={activeMountain.image} alt={activeMountain.name} width={900} height={700} loading="lazy" decoding="async" className="w-full h-full object-cover" />
               </div>
               <div className="p-5 sm:p-8 flex flex-col justify-between">
                 <div>

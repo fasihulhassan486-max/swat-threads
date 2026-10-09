@@ -3,6 +3,7 @@ import { useLocation, useSearchParams } from 'react-router-dom'
 import { site } from '../config/site'
 import { useStore } from '../context/StoreContext'
 import { stripHtml } from '../lib/html'
+import { matchesCategory } from '../lib/categories'
 
 function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
   let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null
@@ -52,6 +53,11 @@ export default function Seo() {
 
   useEffect(() => {
     const cat = (q.get('category') || '').toLowerCase()
+    const categoryProducts = products.filter(p => matchesCategory(p, cat))
+    const isMenCategory = ['men', 'mens', 'men-shawls', 'mens-shawls'].includes(cat) ||
+      (categoryProducts.length > 0 && categoryProducts.every(p => matchesCategory(p, 'men')))
+    const isWomenCategory = ['women', 'womens', 'women-shawls', 'womens-shawls'].includes(cat) ||
+      (categoryProducts.length > 0 && categoryProducts.every(p => matchesCategory(p, 'women')))
     const wishlist = Boolean(q.get('wishlist'))
     const privateRoute = ['/cart', '/checkout', '/order-confirmation'].includes(pathname) || wishlist
 
@@ -60,11 +66,11 @@ export default function Seo() {
     let canonicalPath = pathname === '/' ? '/' : pathname
     let ogImage = `${origin}/images/swat-mountains.jpg`
 
-    if (pathname === '/shop' && cat === 'men') {
+    if (pathname === '/shop' && isMenCategory) {
       title = "Men's Wool Shawls from Swat | Viras"
       description = "Shop men's wool shawls from Swat Valley at Viras. Traditional Swati craftsmanship in a considered collection of one-of-one pieces."
       canonicalPath = '/shop?category=men'
-    } else if (pathname === '/shop' && cat === 'women') {
+    } else if (pathname === '/shop' && isWomenCategory) {
       title = "Women's Wool Shawls from Swat | Viras"
       description = "Shop women's wool shawls from Swat at Viras, including wool and Swiss Lawn options for everyday wear, evenings, and gifting."
       canonicalPath = '/shop?category=women'
@@ -91,7 +97,7 @@ export default function Seo() {
       description = 'Contact Viras on WhatsApp or email for orders, custom shawls, and questions about Swati wool shawls.'
     } else if (pathname === '/shipping') {
       title = 'Shipping Policy | Viras'
-      description = 'Nationwide delivery across Pakistan. Estimated delivery is 3 to 4 working days. Standard shipping is PKR 250 per order.'
+      description = 'Nationwide delivery in 3 to 4 working days. Shipping is PKR 250 on orders under PKR 5,000 and free on orders of PKR 5,000 or more.'
     } else if (pathname === '/returns') {
       title = 'Returns & Refunds | Viras'
       description = 'Read the Viras returns policy for ready shawls and custom orders made in Swat Valley.'
@@ -132,6 +138,7 @@ export default function Seo() {
     upsertMeta('name', 'twitter:card', 'summary_large_image')
     upsertMeta('name', 'twitter:title', title)
     upsertMeta('name', 'twitter:description', description)
+    upsertMeta('name', 'twitter:image', ogImage)
     upsertLink('canonical', canonical)
 
     const org = {
@@ -190,7 +197,7 @@ export default function Seo() {
       setJsonLd('viras-product-jsonld', null)
       setJsonLd('viras-breadcrumb-jsonld', null)
     }
-  }, [pathname, search, product])
+  }, [pathname, search, product, products])
 
   return null
 }

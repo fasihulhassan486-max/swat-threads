@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react'
 import type { GiftDetails, Line, Product } from '../types'
 import { track } from '../lib/analytics'
-import { fetchProducts, wooEnabled } from '../lib/woocommerce'
+import { fetchFeaturedProducts, fetchProducts } from '../lib/woocommerce'
 
 export { matchesCategory, parseWooCategories } from '../lib/categories'
 
@@ -31,7 +31,7 @@ const load = <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(wooEnabled)
+  const [loading, setLoading] = useState(true)
   const [productsError, setProductsError] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
   const [lines, setLines] = useState<Line[]>(() => load('st-lines', []))
@@ -41,28 +41,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const reloadProducts = useCallback(() => setReloadKey(k => k + 1), [])
 
   useEffect(() => {
-    if (!wooEnabled) {
-      setProducts([])
-      setFeaturedProducts([])
-      setLoading(false)
-      setProductsError(null)
-      return
-    }
-
     let cancelled = false
     const loadCatalog = async () => {
       setLoading(true)
       setProductsError(null)
       try {
-        const catalog = await fetchProducts()
+        const [catalog, featured] = await Promise.all([fetchProducts(), fetchFeaturedProducts()])
         if (cancelled) return
         setProducts(catalog)
-        setFeaturedProducts(catalog.filter(p => p.featured))
-      } catch {
+        setFeaturedProducts(featured)
+      } catch (error) {
         if (!cancelled) {
           setProducts([])
           setFeaturedProducts([])
-          setProductsError('We could not load the collection. Please try again.')
+          setProductsError(error instanceof Error
+            ? `${error.message} Please check the store configuration and try again.`
+            : 'We could not load the collection due to an unexpected error. Please try again.')
         }
       } finally {
         if (!cancelled) setLoading(false)

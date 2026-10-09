@@ -1,4 +1,8 @@
-const BLOCKED_TAGS = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META', 'FORM', 'INPUT', 'BUTTON'])
+const ALLOWED_TAGS = new Set([
+  'A', 'B', 'BLOCKQUOTE', 'BR', 'CODE', 'DEL', 'DIV', 'EM', 'H2', 'H3', 'H4',
+  'HR', 'I', 'LI', 'OL', 'P', 'PRE', 'S', 'SPAN', 'STRONG', 'SUB', 'SUP', 'U', 'UL',
+])
+const BLOCKED_TAGS = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'SVG', 'MATH', 'TEMPLATE'])
 
 export function stripHtml(html: string): string {
   return (html || '')
@@ -19,7 +23,8 @@ export function hasHtmlText(html: string): boolean {
 }
 
 export function sanitizeHtml(html: string): string {
-  if (!html || typeof window === 'undefined') return html || ''
+  if (!html) return ''
+  if (typeof window === 'undefined') return stripHtml(html)
   const doc = new DOMParser().parseFromString(html, 'text/html')
   const walk = (node: Element) => {
     for (const child of Array.from(node.children)) {
@@ -30,15 +35,19 @@ export function sanitizeHtml(html: string): string {
       for (const attr of Array.from(child.attributes)) {
         const name = attr.name.toLowerCase()
         const value = attr.value.trim()
-        if (name.startsWith('on') || name === 'srcdoc' || name === 'xlink:href') {
+        if (child.tagName !== 'A' || !['href', 'title'].includes(name)) {
           child.removeAttribute(attr.name)
           continue
         }
-        if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) {
+        if (name === 'href' && /^(?:javascript|data|vbscript):/i.test(value)) {
           child.removeAttribute(attr.name)
         }
       }
+      if (child.tagName === 'A' && child.hasAttribute('href')) {
+        child.setAttribute('rel', 'noopener noreferrer')
+      }
       walk(child)
+      if (!ALLOWED_TAGS.has(child.tagName)) child.replaceWith(...Array.from(child.childNodes))
     }
   }
   walk(doc.body)

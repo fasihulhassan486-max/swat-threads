@@ -3,11 +3,31 @@ import type { Line, Product } from '../types'
 import { parseWooCategories } from './categories'
 import { stripHtml } from './html'
 import type { totals } from './pricing'
+import { FREE_SHIPPING_THRESHOLD } from './pricing'
 
 const base = site.wc.url.replace(/\/$/, '')
 export const wooEnabled = !!base
 
-export function mapWooProduct(d: any): Product {
+function productsEndpoint(path: string, params: Record<string, string> = {}) {
+  if (!wooEnabled) {
+    throw new Error('WooCommerce is not configured. Set VITE_WC_URL.')
+  }
+
+  const query = new URLSearchParams(params)
+  return `${base}/wp-json/wc/store/v1/${path}?${query}`
+}
+
+async function requestProducts(path: string, params: Record<string, string> = {}) {
+  const url = productsEndpoint(path, params)
+  const response = await fetch(url, { mode: 'cors', credentials: 'omit' })
+  if (!response.ok) {
+    const detail = await response.text()
+    throw new Error(`WooCommerce ${path} request failed (${response.status} ${response.statusText})${detail ? `: ${detail}` : ''}`)
+  }
+  return response
+}
+
+export function mapWooProduct(d: any, featuredOverride?: boolean): Product {
   const div = d.prices ? 10 ** (d.prices.currency_minor_unit ?? 0) : 1
   const price = d.prices?.price != null
     ? Number(d.prices.price) / div
@@ -34,7 +54,7 @@ export function mapWooProduct(d: any): Product {
     category,
     categories,
     badge: d.tags?.[0]?.name || (d.featured ? 'Featured' : undefined),
-    featured: Boolean(d.featured ?? d.is_featured),
+    featured: featuredOverride ?? Boolean(d.featured ?? d.is_featured),
     description: d.description || '',
     short_description: d.short_description || '',
     tone: '#8a8478',
@@ -44,38 +64,88 @@ export function mapWooProduct(d: any): Product {
   }
 }
 
-async function fetchStorePage(page: number): Promise<any[]> {
-  const params = new URLSearchParams({ per_page: '100', page: String(page) })
-  const res = await fetch(`${base}/wp-json/wc/store/v1/products?${params}`)
-  if (!res.ok) throw new Error('WooCommerce products request failed')
-  const data = await res.json()
+async function fetchProductPage(page: number, featured = false): Promise<any[]> {
+  const response = await requestProducts('products', {
+    per_page: '100',
+    page: String(page),
+    ...(featured ? { featured: 'true' } : {}),
+  })
+  const data = await response.json()
+  if (!Array.isArray(data)) {
+    throw new Error('WooCommerce products response was not a product list.')
+  }
   return Array.isArray(data) ? data : []
 }
 
-export async function fetchProducts(): Promise<Product[]> {
-  if (!wooEnabled) return []
-  const seen = new Set<string>()
-  const products: Product[] = []
-  for (let page = 1; page <= 10; page++) {
-    const rows = await fetchStorePage(page)
-    if (!rows.length) break
-    for (const row of rows) {
-      const product = mapWooProduct(row)
-      if (seen.has(product.id)) continue
-      seen.add(product.id)
-      products.push(product)
-    }
-    if (rows.length < 100) break
-  }
-  return products
+const productListRequests = new Map<string, Promise<Product[]>>()
+
+function loadProductList(key: string, load: () => Promise<Product[]>): Promise<Product[]> {
+  const existing = productListRequests.get(key)
+  if (existing) return existing
+  const request = load()
+  productListRequests.set(key, request)
+  const clear = () => { if (productListRequests.get(key) === request) productListRequests.delete(key) }
+  void request.then(clear, clear)
+  return request
 }
 
+export function fetchProducts(): Promise<Product[]> {
+  return loadProductList('all', async () => {
+    const seen = new Set<string>()
+    const products: Product[] = []
+    for (let page = 1; ; page++) {
+      const rows = await fetchProductPage(page)
+      if (!rows.length) break
+      for (const row of rows) {
+        const product = mapWooProduct(row)
+        if (seen.has(product.id)) continue
+        seen.add(product.id)
+        products.push(product)
+      }
+      if (rows.length < 100) break
+    }
+    return products
+  })
+}
+
+export function fetchFeaturedProducts(): Promise<Product[]> {
+  return loadProductList('featured', async () => {
+    const products: Product[] = []
+    for (let page = 1; ; page++) {
+      const rows = await fetchProductPage(page, true)
+      products.push(...rows.map((row: any) => mapWooProduct(row, true)))
+      if (rows.length < 100) break
+    }
+    return products
+  })
+}
+
+const productRequests = new Map<string, Promise<Product | null>>()
+
 export async function fetchProductById(id: string): Promise<Product | null> {
-  if (!wooEnabled || !id) return null
-  const res = await fetch(`${base}/wp-json/wc/store/v1/products/${id}`)
-  if (!res.ok) return null
-  const item = await res.json()
-  return item?.id ? mapWooProduct(item) : null
+  if (!id) return null
+  if (!/^\d+$/.test(id)) throw new Error(`Invalid WooCommerce product ID: ${id}`)
+  const existing = productRequests.get(id)
+  if (existing) return existing
+
+  const request = (async () => {
+    const path = `products/${encodeURIComponent(id)}`
+    const url = productsEndpoint(path)
+    const res = await fetch(url, { mode: 'cors', credentials: 'omit' })
+    if (res.status === 404) return null
+    if (!res.ok) {
+      const detail = await res.text()
+      throw new Error(`WooCommerce product request failed (${res.status} ${res.statusText})${detail ? `: ${detail}` : ''}`)
+    }
+    const item = await res.json()
+    return item?.id ? mapWooProduct(item) : null
+  })()
+  productRequests.set(id, request)
+  void request.then(
+    () => { if (productRequests.get(id) === request) productRequests.delete(id) },
+    () => { if (productRequests.get(id) === request) productRequests.delete(id) },
+  )
+  return request
 }
 export type Customer = {
   name: string
@@ -86,10 +156,17 @@ export type Customer = {
   deliveryInstructions?: string
 }
 
-// Creates the order in WooCommerce. WooCommerce reduces stock automatically, so the piece shows as sold.
-// SECURITY: wc/v3 needs API keys. For production point VITE_ORDER_PROXY_URL at a tiny server/function that adds the keys.
+// Orders are submitted through a trusted server endpoint; WooCommerce credentials never enter the browser.
 export async function createOrder(lines: Line[], c: Customer, method: string, t: ReturnType<typeof totals>) {
   if (!wooEnabled) return null
+  if (!site.wc.orderProxy) {
+    throw new Error('Secure order submission is not configured. Set VITE_ORDER_PROXY_URL to a server-side WooCommerce order proxy.')
+  }
+  const proxy = new URL(site.wc.orderProxy)
+  const wordpress = new URL(base)
+  if (proxy.origin === wordpress.origin && /\/wp-json\/wc\/v3\/orders\/?$/i.test(proxy.pathname)) {
+    throw new Error('VITE_ORDER_PROXY_URL must use a trusted server-side endpoint, not the WooCommerce REST API directly.')
+  }
   const [first, ...rest] = c.name.trim().split(' ')
   const addr = {
     first_name: first,
@@ -140,13 +217,16 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
     paymentMethodTitle = 'Credit / Debit Card'
   }
 
-  const shippingLines = t.shipping > 0 ? [
-    {
-      method_id: 'flat_rate',
-      method_title: `Standard Delivery (${site.deliveryTime})`,
-      total: String(t.shipping),
-    }
-  ] : []
+  const shippingLines = [{
+    method_id: 'flat_rate',
+    method_title: t.shipping === 0 ? 'Free Shipping' : `Standard Delivery (${site.deliveryTime})`,
+    total: String(t.shipping),
+    meta_data: [
+      { key: 'shipping_threshold', value: String(FREE_SHIPPING_THRESHOLD) },
+      { key: 'shipping_amount', value: String(t.shipping) },
+      { key: 'shipping_status', value: t.shipping === 0 ? 'free' : 'flat_rate' },
+    ],
+  }]
 
   const notesList = [
     t.hasCustom ? `Custom order. Advance due now: PKR ${t.dueNow}. Balance on delivery: PKR ${t.balanceCOD}.` : '',
@@ -183,12 +263,16 @@ export async function createOrder(lines: Line[], c: Customer, method: string, t:
       delivery_instructions: c.deliveryInstructions,
       estimated_delivery: site.deliveryTime,
       easypaisa_account: method === 'easypaisa' ? '0309 6424489 (Fasih Ul Hassan)' : undefined,
+      shipping_threshold: String(FREE_SHIPPING_THRESHOLD),
+      shipping_amount: String(t.shipping),
+      shipping_status: t.shipping === 0 ? 'free' : 'flat_rate',
     }),
   }
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  let url = site.wc.orderProxy
-  if (!url) { url = `${base}/wp-json/wc/v3/orders`; if (site.wc.key) headers.Authorization = 'Basic ' + btoa(`${site.wc.key}:${site.wc.secret}`) }
-  const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
-  if (!res.ok) throw new Error('Order failed')
+  const res = await fetch(proxy.toString(), { method: 'POST', headers, body: JSON.stringify(body) })
+  if (!res.ok) {
+    const detail = await res.text()
+    throw new Error(`Order failed (${res.status} ${res.statusText})${detail ? `: ${detail}` : ''}`)
+  }
   return res.json()
 }

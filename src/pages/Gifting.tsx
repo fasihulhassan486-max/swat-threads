@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore } from '../context/StoreContext'
+import { matchesCategory, useStore } from '../context/StoreContext'
 import { pkr } from '../lib/format'
 import { site } from '../config/site'
 import { DELIVERY_TIME } from '../lib/pricing'
@@ -18,7 +18,7 @@ const OCCASIONS = [
 ]
 
 export default function Gifting() {
-  const { products, inStock, addProduct, loading } = useStore()
+  const { products, inStock, addProduct, loading, productsError, reloadProducts } = useStore()
   const navigate = useNavigate()
 
   // Form State
@@ -36,15 +36,15 @@ export default function Gifting() {
 
   // Check if any product has the 'gifting' category
   const hasGiftingCategory = useMemo(() => {
-    return availableShawls.some(p => p.category === 'gifting')
+    return availableShawls.some(p => matchesCategory(p, 'gifting'))
   }, [availableShawls])
 
   // Filtered list
   const displayedShawls = useMemo(() => {
     if (categoryFilter === 'all') return availableShawls
-    if (categoryFilter === 'gifting') return availableShawls.filter(p => p.category === 'gifting')
-    if (categoryFilter === 'men') return availableShawls.filter(p => p.category === 'men')
-    if (categoryFilter === 'women') return availableShawls.filter(p => p.category === 'women')
+    if (categoryFilter === 'gifting') return availableShawls.filter(p => matchesCategory(p, 'gifting'))
+    if (categoryFilter === 'men') return availableShawls.filter(p => matchesCategory(p, 'men'))
+    if (categoryFilter === 'women') return availableShawls.filter(p => matchesCategory(p, 'women'))
     return availableShawls
   }, [availableShawls, categoryFilter])
 
@@ -178,6 +178,11 @@ export default function Gifting() {
             {loading ? (
               <div className="py-16 text-center text-ink/60 font-serif">
                 <p>Loading available Swat shawls…</p>
+              </div>
+            ) : productsError ? (
+              <div className="py-12 text-center">
+                <p className="text-ink/70 font-serif mb-3">{productsError}</p>
+                <button type="button" className="btn-outline" onClick={reloadProducts}>Try again</button>
               </div>
             ) : displayedShawls.length === 0 ? (
               <div className="py-12 text-center text-ink/60 font-serif">

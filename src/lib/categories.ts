@@ -1,117 +1,59 @@
 import type { Category, Product } from '../types'
 
+const categoryAliases: Record<string, string[]> = {
+  men: ['men', 'mens', 'men-shawls', 'mens-shawls'],
+  women: ['women', 'womens', 'women-shawls', 'womens-shawls'],
+  'couple-bundle': ['couple', 'couples', 'couple-set', 'couple-bundle', 'couples-bundle', 'his-and-hers'],
+  gifting: ['gift', 'gifts', 'gifting', 'gift-card', 'gift-cards', 'gift-packaging', 'packaging'],
+}
+
+type WooCategory = { id?: number | string; name?: string; slug?: string }
+
+function categoryValues(rawCategories: unknown): string[] {
+  if (!Array.isArray(rawCategories)) return []
+  return rawCategories.flatMap((item: unknown) => {
+    if (typeof item === 'string') return [item.trim().toLowerCase()].filter(Boolean)
+    if (!item || typeof item !== 'object') return []
+    const category = item as WooCategory
+    return [category.slug, category.name, category.id?.toString()]
+      .filter((value): value is string => typeof value === 'string' && Boolean(value.trim()))
+      .map(value => value.trim().toLowerCase())
+  })
+}
+
 export function parseWooCategories(
-  rawCategories: any,
-  productName = ''
+  rawCategories: unknown,
+  _productName = ''
 ): { category: Category; categories: string[] } {
-  const catsArray = Array.isArray(rawCategories) ? rawCategories : []
+  const categories = Array.from(new Set(categoryValues(rawCategories)))
+  const slugs = new Set(categories)
+  const primaryCategory = (['couple-bundle', 'women', 'gifting', 'men'] as const)
+    .find(category => categoryAliases[category].some(alias => slugs.has(alias)))
 
-  const slugs: string[] = []
-  const names: string[] = []
-
-  for (const c of catsArray) {
-    if (typeof c === 'string' && c.trim()) {
-      slugs.push(c.trim().toLowerCase())
-    } else if (c && typeof c === 'object') {
-      if (typeof c.slug === 'string' && c.slug.trim()) {
-        slugs.push(c.slug.trim().toLowerCase())
-      }
-      if (typeof c.name === 'string' && c.name.trim()) {
-        names.push(c.name.trim().toLowerCase())
-      }
-    }
+  return {
+    category: primaryCategory || categories.find(value => !/^\d+$/.test(value)) || 'uncategorized',
+    categories,
   }
-
-  const allTokens = [...slugs, ...names]
-  const cleanName = (productName || '').toLowerCase()
-
-  const hasToken = (regex: RegExp, directSlugs: string[]) =>
-    allTokens.some(t => directSlugs.includes(t) || regex.test(t)) || regex.test(cleanName)
-
-  const isCouple = hasToken(
-    /(?:^|[\s_-])couples?(?:[\s_-]|$)|couple-bundle|his-and-hers/i,
-    ['couple-bundle', 'couple', 'couples', 'couple-set', 'couples-bundle']
-  )
-
-  const isWomen = hasToken(
-    /(?:^|[\s_-])womens?(?:[\s_'-]|$)/i,
-    ['women', 'womens', 'women-shawls', 'womens-shawls']
-  )
-
-  const isMen = hasToken(
-    /(?:^|[\s_-])mens?(?:[\s_'-]|$)/i,
-    ['men', 'mens', 'men-shawls', 'mens-shawls']
-  )
-
-  const isGifting = hasToken(
-    /(?:^|[\s_-])gifts?(?:ing)?(?:[\s_-]|$)/i,
-    ['gifting', 'gift', 'gifts']
-  )
-
-  let primaryCategory: Category = 'men'
-  if (isCouple) {
-    primaryCategory = 'couple-bundle'
-  } else if (isWomen) {
-    primaryCategory = 'women'
-  } else if (isGifting) {
-    primaryCategory = 'gifting'
-  } else if (isMen) {
-    primaryCategory = 'men'
-  } else if (slugs[0]) {
-    primaryCategory = slugs[0] as Category
-  }
-
-  const uniqueCategories = Array.from(
-    new Set([...slugs, primaryCategory].filter(Boolean))
-  )
-
-  return { category: primaryCategory, categories: uniqueCategories }
 }
 
 export function matchesCategory(product: Product, targetCategory: string | null): boolean {
-  if (!targetCategory || targetCategory === 'all') return true
+  if (!targetCategory || targetCategory.toLowerCase() === 'all') return true
 
-  const target = targetCategory.toLowerCase().trim()
-  const primary = (product.category || '').toLowerCase().trim()
-  const allCats = Array.from(
-    new Set([primary, ...(product.categories || []).map(c => c.toLowerCase().trim())])
-  ).filter(Boolean)
+  const target = targetCategory.trim().toLowerCase()
+  const categories = new Set([
+    (product.category || '').toLowerCase().trim(),
+    ...(product.categories || []).map(category => category.toLowerCase().trim()),
+  ])
+  const isCouple = categories.has('couple-bundle') ||
+    categoryAliases['couple-bundle'].some(alias => categories.has(alias))
 
-  if (target === 'men' || target === 'mens') {
-    if (primary === 'men') return true
-    if (primary !== 'couple-bundle' && allCats.some(c => c === 'men' || c === 'mens' || /(?:^|[\s_-])mens?(?:[\s_'-]|$)/i.test(c))) {
-      return true
-    }
-    return false
-  }
+  if (/^\d+$/.test(target)) return categories.has(target)
 
-  if (target === 'women' || target === 'womens') {
-    if (primary === 'women') return true
-    if (primary !== 'couple-bundle' && allCats.some(c => c === 'women' || c === 'womens' || /(?:^|[\s_-])womens?(?:[\s_'-]|$)/i.test(c))) {
-      return true
-    }
-    return false
-  }
-
-  if (target === 'couple-bundle' || target === 'couple' || target === 'couples') {
-    if (primary === 'couple-bundle' || primary === 'couple') return true
-    return allCats.some(
-      c =>
-        c === 'couple-bundle' ||
-        c === 'couple' ||
-        c === 'couples' ||
-        /(?:^|[\s_-])couples?(?:[\s_-]|$)|couple-bundle|his-and-hers/i.test(c)
-    )
-  }
-
-  if (target === 'gifting' || target === 'gift') {
-    if (primary === 'gifting') return true
-    return allCats.some(c => c === 'gifting' || /(?:^|[\s_-])gifts?(?:ing)?(?:[\s_-]|$)/i.test(c))
-  }
-
-  return (
-    primary === target ||
-    allCats.includes(target) ||
-    allCats.some(c => c.includes(target) || target.includes(c))
+  const canonicalTarget = Object.keys(categoryAliases).find(category =>
+    categoryAliases[category].includes(target)
   )
+  if (!canonicalTarget) return categories.has(target)
+  if (canonicalTarget === 'couple-bundle') return isCouple
+  if ((canonicalTarget === 'men' || canonicalTarget === 'women') && isCouple) return false
+  return categoryAliases[canonicalTarget].some(alias => categories.has(alias))
 }

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useStore } from '../context/StoreContext'
+import { matchesCategory, useStore } from '../context/StoreContext'
 import { Media, Icon } from '../components/ui'
 import { customPrice, CUSTOMIZATION_OPTION_PRICE, WOMEN_EMBROIDERY_PRICE } from '../lib/pricing'
 import { pkr } from '../lib/format'
@@ -44,7 +44,7 @@ const COUPLE_MENS_DESIGNS = ['Plain', 'Border'] as const
 const COUPLE_WOMENS_DESIGNS = ['Plain', 'Embroidered'] as const
 
 export default function Customize() {
-  const { addCustom, products } = useStore()
+  const { addCustom, products, loading, productsError, reloadProducts } = useStore()
   const nav = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -310,14 +310,16 @@ export default function Customize() {
   // ─── FILTERED PRODUCTS LIST ────────────────────────────────────────────────
 
   const coupleProducts = useMemo(() => {
-    return products.filter(p => p.category === 'couple-bundle' || p.category === 'couple')
+    return products.filter(p => matchesCategory(p, 'couple-bundle'))
   }, [products])
 
   const displayedProducts = useMemo(() => {
-    if (activeTab === 'men') return products.filter(p => p.category === 'men')
-    if (activeTab === 'women') return products.filter(p => p.category === 'women')
+    if (activeTab === 'men') return products.filter(p => matchesCategory(p, 'men'))
+    if (activeTab === 'women') return products.filter(p => matchesCategory(p, 'women'))
     if (activeTab === 'couple') return coupleProducts
-    return products
+    return products.filter(p =>
+      matchesCategory(p, 'men') || matchesCategory(p, 'women') || matchesCategory(p, 'couple-bundle')
+    )
   }, [products, activeTab, coupleProducts])
 
   return (
@@ -355,7 +357,15 @@ export default function Customize() {
       </div>
 
       {/* PRODUCTS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      {loading ? (
+        <p className="py-16 text-center text-ink/70 font-serif">Loading customization options…</p>
+      ) : productsError ? (
+        <div className="py-16 text-center">
+          <p className="text-ink/70 font-serif mb-3">{productsError}</p>
+          <button type="button" className="btn-outline" onClick={reloadProducts}>Try again</button>
+        </div>
+      ) : displayedProducts.length ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {displayedProducts.map(p => (
           <div
             key={p.id}
@@ -383,7 +393,10 @@ export default function Customize() {
             </button>
           </div>
         ))}
-      </div>
+        </div>
+      ) : (
+        <p className="py-16 text-center text-ink/70 font-serif">No customizable shawls are available in this category right now.</p>
+      )}
 
       {/* ─── DYNAMIC CUSTOMIZATION MODAL ─────────────────────────────────────── */}
       {base && (

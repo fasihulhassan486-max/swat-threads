@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { totals, SHIPPING_FEE, DELIVERY_TIME } from '../lib/pricing'
+import { totals, DELIVERY_TIME, shippingOfferMessage } from '../lib/pricing'
 import { site } from '../config/site'
 import { pkr } from '../lib/format'
 import { GiftFields, Media } from '../components/ui'
@@ -25,8 +25,13 @@ export function Summary() {
       {/* SHIPPING ROW */}
       <div className="flex justify-between items-center">
         <span>Estimated delivery: {DELIVERY_TIME}</span>
-        <span>{pkr(SHIPPING_FEE)}</span>
+        <span className={t.shipping === 0 ? 'font-medium text-emerald-700' : ''}>
+          {t.shipping === 0 ? 'Free Shipping' : `Shipping: ${pkr(t.shipping)}`}
+        </span>
       </div>
+      <p className="text-[11px] text-ink/60 text-right">
+        {shippingOfferMessage(t.orderValue, lines.length > 0)}
+      </p>
 
       <Row l="Total" v={pkr(t.total)} b />
       {t.hasCustom && (

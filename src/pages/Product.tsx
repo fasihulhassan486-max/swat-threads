@@ -7,13 +7,14 @@ import { pkr } from '../lib/format'
 import { track } from '../lib/analytics'
 import { fetchProductById } from '../lib/woocommerce'
 import { hasHtmlText, sanitizeHtml } from '../lib/html'
-import { DELIVERY_TIME, SHIPPING_FEE } from '../lib/pricing'
+import { calcShipping, DELIVERY_TIME } from '../lib/pricing'
 import type { Product, ProductImage } from '../types'
 
 export function ProductDetail({ product: propProduct }: { product?: Product } = {}) {
   const { id } = useParams()
   const { products, featuredProducts, loading, inStock, inCart, addProduct, wishlist, toggleWish } = useStore()
   const [v, setV] = useState(0)
+  const [productError, setProductError] = useState<string | null>(null)
 
   // Find product from props, main catalog, or featured list
   const found = propProduct || products.find(x => x.id === id) || featuredProducts?.find(x => x.id === id)
@@ -27,16 +28,27 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
   }, [found?.id])
 
   useEffect(() => {
-    if (product || !id || loading) return
+    if (found || !id || loading) return
     let cancelled = false
-    fetchProductById(id).then(item => {
-      if (!cancelled && item) setProduct(item)
-    })
+    setProductError(null)
+    fetchProductById(id)
+      .then(item => {
+        if (!cancelled) {
+          setProduct(item || undefined)
+          if (!item) setProductError('This product is not available in WooCommerce.')
+        }
+      })
+      .catch(error => {
+        if (!cancelled) {
+          setProduct(undefined)
+          setProductError(error instanceof Error ? error.message : 'Could not load this product from WooCommerce.')
+        }
+      })
     return () => { cancelled = true }
-  }, [id, product, loading])
+  }, [id, found, loading])
 
   if (loading && !product) return <div className="container-x py-16 sm:py-20 text-ink/70 font-serif">Loading…</div>
-  if (!product) return <div className="container-x py-16 sm:py-20 font-serif">Product not found. <Link to="/shop" className="underline">Back to shop</Link></div>
+  if (!product) return <div className="container-x py-16 sm:py-20 font-serif">{productError || 'Product not found.'} <Link to="/shop" className="underline">Back to shop</Link></div>
 
   const ok = inStock(product)
   const productImages: ProductImage[] = (product.images || []).map((img, idx) => {
@@ -64,6 +76,7 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
   const shortHtml = sanitizeHtml(product.short_description || '')
   const hasShort = hasHtmlText(product.short_description || '')
   const hasLong = hasHtmlText(product.description || '')
+  const productShipping = calcShipping(product.price)
 
   return (
     <article className="product-details-container container-x py-8 sm:py-12">
@@ -145,7 +158,7 @@ export function ProductDetail({ product: propProduct }: { product?: Product } = 
 
           <p className="text-xs text-ink/75 flex items-center gap-1.5 mb-5 font-sans">
             <Icon n="truck" className="w-3.5 h-3.5 text-brass shrink-0" />
-            <span>Estimated delivery: {DELIVERY_TIME} · Shipping {pkr(SHIPPING_FEE)}</span>
+            <span>Estimated delivery: {DELIVERY_TIME} · {productShipping === 0 ? 'Free Shipping' : `Shipping ${pkr(productShipping)}`}</span>
           </p>
 
           <div className="flex gap-3">
